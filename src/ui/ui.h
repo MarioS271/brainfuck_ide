@@ -73,6 +73,8 @@ typedef struct {
     char* editor_buffer;
     size_t editor_buffer_len;
 
+    int cursor_pos;
+
     bool in_menubar;
     int current_menubar_option;
 
@@ -84,12 +86,6 @@ typedef struct {
         bool tape;
     };
     struct _Dirty dirty;
-
-    struct _CursorPos {
-        int x;
-        int y;
-    };
-    struct _CursorPos cursor_pos;
 } UIState;
 
 
@@ -98,6 +94,7 @@ void init_ui();
 void shutdown_ui();
 
 void resize_ui();
+void ui_set_cursor_pos();
 
 void draw_menubar();
 void draw_panel_borders();

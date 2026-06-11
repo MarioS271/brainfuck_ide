@@ -22,7 +22,7 @@
 #define OUTPUT_PANEL_WIDTH (COLS - OUTPUT_PANEL_X)
 #define OUTPUT_PANEL_HEIGHT (LINES - OUTPUT_PANEL_Y - TAPE_PANEL_HEIGHT - 2)
 #define TAPE_PANEL_WIDTH COLS
-#define TAPE_PANEL_HEIGHT 3
+#define TAPE_PANEL_HEIGHT 4
 // Seperator Positions
 #define UPPER_PANELS_SEPERATOR_X (EDITOR_PANEL_WIDTH + 1)
 #define UPPER_PANELS_SEPERATOR_Y EDITOR_PANEL_Y
@@ -50,6 +50,33 @@
 #define MENUBAR_EXIT_POS (COLS - MENUBAR_BASE_POS - strlen(MENUBAR_EXIT_TEXT))
 
 
+// Editor Panel
+#define EDITOR_PADDING_X 3
+#define EDITOR_PADDING_Y 2
+
+
+// Data Structure
+typedef struct {
+    int last_event;
+
+    struct _Dirty {
+        bool panel_borders;
+        bool menubar;
+        bool editor;
+        bool output;
+        bool tape;
+    };
+    struct _Dirty dirty;
+
+    struct _CursorPos {
+        int x;
+        int y;
+        bool in_menubar;
+    };
+    struct _CursorPos cursor_pos;
+} UIState;
+
+
 // Function Headers
 void init_ui();
 void shutdown_ui();
@@ -58,6 +85,6 @@ void resize_and_clear_ui();
 
 void draw_menubar();
 void draw_panel_borders();
-void draw_editor_panel();
-void draw_output_panel();
-void draw_tape_panel();
+void draw_editor_panel(UIState* state);
+void draw_output_panel(UIState* state);
+void draw_tape_panel(UIState* state);

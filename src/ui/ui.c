@@ -72,3 +72,15 @@ void draw_panel_borders() {
     setcchar(&fill, &crossing_symbol, A_NORMAL, 0, nullptr);
     mvadd_wch(LOWER_PANEL_SEPERATOR_Y, UPPER_PANELS_SEPERATOR_X, &fill);
 }
+
+void draw_editor_panel(UIState* state) {
+    
+}
+
+void draw_output_panel(UIState* state) {
+
+}
+
+void draw_tape_panel(UIState* state) {
+
+}

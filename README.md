@@ -1,6 +1,6 @@
 # Brainfuck IDE
 
-A TUI-based IDE for writing, running, and debugging [Brainfuck](https://wikipedia.org/wiki/Brainfuck) programs, built with PDCurses.
+A TUI-based IDE for writing, running, and debugging **brainfuck** programs, built with PDCurses.
 
 ---
 
@@ -15,7 +15,7 @@ A TUI-based IDE for writing, running, and debugging [Brainfuck](https://wikipedi
 
 ## Dependencies
 
-- [PDCurses](https://github.com/wmcbrine/PDCurses) (public domain)
+- [PDCurses](https://github.com/wmcbrine/PDCurses) (MIT license)
 
 ---
 
@@ -23,15 +23,15 @@ A TUI-based IDE for writing, running, and debugging [Brainfuck](https://wikipedi
 
 Brainfuck operates on an array of memory cells (the "tape"), each initialized to zero, with a pointer starting at the leftmost cell. There are only 8 commands:
 
-| Command | Effect |
-|---------|--------|
-| `>`     | Move the pointer right |
-| `<`     | Move the pointer left |
-| `+`     | Increment the current cell |
-| `-`     | Decrement the current cell |
-| `.`     | Output the current cell as an ASCII character |
-| `,`     | Read one byte of input into the current cell |
-| `[`     | If the current cell is zero, jump forward to the matching `]` |
+| Command | Effect                                                         |
+|---------|----------------------------------------------------------------|
+| `>`     | Move the pointer right                                         |
+| `<`     | Move the pointer left                                          |
+| `+`     | Increment the current cell                                     |
+| `-`     | Decrement the current cell                                     |
+| `.`     | Output the current cell as an ASCII character                  |
+| `,`     | Read one byte of input into the current cell                   |
+| `[`     | If the current cell is zero, jump forward to the matching `]`  |
 | `]`     | If the current cell is non-zero, jump back to the matching `[` |
 
 Everything else in the source is treated as a comment.

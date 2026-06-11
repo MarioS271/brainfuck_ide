@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#include "defs.h"
-#include "funcs.h"
+#include "interpreter/interpreter.h"
+#include "ui/ui.h"
 
 int main(void) {
     char prog[] = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";

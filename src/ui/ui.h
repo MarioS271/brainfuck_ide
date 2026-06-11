@@ -1,5 +1,5 @@
 /**
- * @file funcs.h
+ * @file ui.h
  * @authors MarioS271
  * 
  * SPDX-FileCopyrightText: (C) MarioS271 2026

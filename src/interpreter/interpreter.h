@@ -1,5 +1,5 @@
 /**
- * @file defs.h
+ * @file interpreter.h
  * @authors MarioS271
  * 
  * SPDX-FileCopyrightText: (C) MarioS271 2026
@@ -18,3 +18,5 @@
 #define INPUT_BYTE ','
 #define LOOP_BEGIN '['
 #define LOOP_END ']'
+
+void run_brainfuck(char* prog, int len);

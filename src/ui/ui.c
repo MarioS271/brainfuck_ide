@@ -6,6 +6,5 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#include "defs.h"
-#include "funcs.h"
+#include "ui.h"
 

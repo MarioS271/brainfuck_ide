@@ -6,9 +6,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#include "demos/tui.h"
-#include "interpreter/interpreter.h"
+#include <demos/tui.h>
 #include "ui/ui.h"
+#include "interpreter/interpreter.h"
 
 int main(void) {
     init_ui();
@@ -22,6 +22,7 @@ int main(void) {
             && LINES > 10)
         {
             draw_menubar();
+            draw_panel_borders();
             refresh();
         }
 

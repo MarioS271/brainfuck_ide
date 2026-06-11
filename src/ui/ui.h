@@ -8,23 +8,42 @@
 
 #pragma once
 
-#include <PDCurses/curses.h>
-
 // Panel Bounds and Seperator Coords
-#define LOWER_PANEL_HEIGHT 3
-#define LOWER_PANEL_SEPERATOR (LINES - LOWER_PANEL_HEIGHT)
-#define UPPER_PANELS_HEIGHT (LOWER_PANEL_SEPERATOR - 1)
-#define UPPER_PANELS_SEPERATOR_X (EDITOR_PANEL_WIDTH + 1)
+// Positions
+#define EDITOR_PANEL_X 0
+#define EDITOR_PANEL_Y 1
+#define OUTPUT_PANEL_X (UPPER_PANELS_SEPERATOR_X + 1)
+#define OUTPUT_PANEL_Y EDITOR_PANEL_Y
+#define TAPE_PANEL_X 0
+#define TAPE_PANEL_Y (LINES - TAPE_PANEL_HEIGHT)
+// Sizes
 #define EDITOR_PANEL_WIDTH ((COLS / 3) * 2 - 1)
-#define OUTPUT_PANEL_WIDTH (COLS - UPPER_PANELS_SEPERATOR_X - 1)
+#define EDITOR_PANEL_HEIGHT (LINES - EDITOR_PANEL_Y - TAPE_PANEL_HEIGHT - 1)
+#define OUTPUT_PANEL_WIDTH (COLS - OUTPUT_PANEL_X)
+#define OUTPUT_PANEL_HEIGHT (LINES - OUTPUT_PANEL_Y - TAPE_PANEL_HEIGHT - 2)
+#define TAPE_PANEL_WIDTH COLS
+#define TAPE_PANEL_HEIGHT 3
+// Seperator Positions
+#define UPPER_PANELS_SEPERATOR_X (EDITOR_PANEL_WIDTH + 1)
+#define UPPER_PANELS_SEPERATOR_Y EDITOR_PANEL_Y
+#define LOWER_PANEL_SEPERATOR_X TAPE_PANEL_X
+#define LOWER_PANEL_SEPERATOR_Y (LINES - TAPE_PANEL_HEIGHT - 1)
+// Seperator Heights
+#define UPPER_PANELS_SEPERATOR_HEIGHT EDITOR_PANEL_HEIGHT
+#define LOWER_PANEL_SEPERATOR_WIDTH COLS
+
 
 // Menu Bar Positions
+// Text
 #define MENUBAR_RUN_TEXT " RUN "
 #define MENUBAR_SAVE_TEXT " SAVE "
 #define MENUBAR_LOAD_TEXT " LOAD "
 #define MENUBAR_EXIT_TEXT " EXIT "
+// Position Presets
+#define MENUBAR_Y 0
 #define MENUBAR_BASE_POS 4
 #define MENUBAR_OPTION_SPACING 2
+// Final Positions
 #define MENUBAR_RUN_POS MENUBAR_BASE_POS
 #define MENUBAR_SAVE_POS (MENUBAR_RUN_POS + MENUBAR_OPTION_SPACING + strlen(MENUBAR_RUN_TEXT))
 #define MENUBAR_LOAD_POS (MENUBAR_SAVE_POS + MENUBAR_OPTION_SPACING + strlen(MENUBAR_LOAD_TEXT))
@@ -39,6 +58,6 @@ void resize_and_clear_ui();
 
 void draw_menubar();
 void draw_panel_borders();
-void draw_editor();
-void draw_output();
-void draw_tape();
+void draw_editor_panel();
+void draw_output_panel();
+void draw_tape_panel();

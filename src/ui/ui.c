@@ -17,10 +17,14 @@ WINDOW* tape_panel;
 
 void init_ui() {
     initscr();
+    start_color();
     noecho();
     cbreak();
     keypad(stdscr, true);
     curs_set(0);
+
+    init_pair(HIGHLIGHT_COLOR_PAIR, COLOR_BLACK, COLOR_WHITE);
+    init_pair(LINE_NUMBER_COLOR_PAIR, COLOR_GREEN, COLOR_BLACK);
 
     editor_panel = newwin(EDITOR_PANEL_HEIGHT, EDITOR_PANEL_WIDTH, EDITOR_PANEL_Y, EDITOR_PANEL_X);
     output_panel = newwin(OUTPUT_PANEL_HEIGHT, OUTPUT_PANEL_WIDTH, OUTPUT_PANEL_Y, OUTPUT_PANEL_X);
@@ -31,14 +35,22 @@ void shutdown_ui() {
     endwin();
 }
 
-void resize_and_clear_ui() {
+void resize_ui() {
     resize_term(0, 0);
-    clear();
+
+    wresize(editor_panel, EDITOR_PANEL_HEIGHT, EDITOR_PANEL_WIDTH);
+    mvwin(editor_panel, EDITOR_PANEL_Y, EDITOR_PANEL_X);
+
+    wresize(output_panel, OUTPUT_PANEL_HEIGHT, OUTPUT_PANEL_WIDTH);
+    mvwin(output_panel, OUTPUT_PANEL_Y, OUTPUT_PANEL_X);
+
+    wresize(tape_panel, TAPE_PANEL_HEIGHT, TAPE_PANEL_WIDTH);
+    mvwin(tape_panel, TAPE_PANEL_Y, TAPE_PANEL_X);
 }
 
 void draw_menubar() {
+    constexpr wchar_t symbol = L'═';
     cchar_t fill;
-    wchar_t symbol = L'═';
 
     setcchar(&fill, &symbol, A_NORMAL, 0, nullptr);
 
@@ -53,9 +65,9 @@ void draw_menubar() {
 }
 
 void draw_panel_borders() {
-    wchar_t vertical_symbol = L'┃';
-    wchar_t horizontal_symbol = L'━';
-    wchar_t crossing_symbol = L'┻';
+    constexpr wchar_t vertical_symbol = L'┃';
+    constexpr wchar_t horizontal_symbol = L'━';
+    constexpr wchar_t crossing_symbol = L'┻';
 
     cchar_t fill;
 
@@ -73,8 +85,52 @@ void draw_panel_borders() {
     mvadd_wch(LOWER_PANEL_SEPERATOR_Y, UPPER_PANELS_SEPERATOR_X, &fill);
 }
 
+void print_empty_cursor(const int row, const int col) {
+    wattron(editor_panel, COLOR_PAIR(HIGHLIGHT_COLOR_PAIR));
+    mvwaddch(editor_panel, row, col, ' ');
+    wattroff(editor_panel, COLOR_PAIR(HIGHLIGHT_COLOR_PAIR));
+}
+
 void draw_editor_panel(UIState* state) {
-    
+    werase(editor_panel);
+
+    int total_lines = 1;
+    for (int i = 0; i < state->editor_buffer_len; ++i) {
+        if (state->editor_buffer[i] == '\n')
+            ++total_lines;
+    }
+
+    const int digit_count = snprintf(nullptr, 0, "%d", total_lines);
+
+    int row = EDITOR_PADDING_Y;
+    int col = EDITOR_PADDING_X;
+    int actual_row = EDITOR_PADDING_Y;
+
+    for (int i = 0; i < state->editor_buffer_len; ++i) {
+        const char current_char = state->editor_buffer[i];
+
+        if (current_char == '\n') {
+            col = EDITOR_PADDING_X;
+            ++row;
+            ++actual_row;
+            continue;
+        }
+
+        if (col > EDITOR_DRAWABLE_WIDTH) {
+            col = EDITOR_PADDING_X + 2;
+            ++row;
+        } else if (col <= EDITOR_PADDING_X) {
+            wattron(editor_panel, COLOR_PAIR(LINE_NUMBER_COLOR_PAIR));
+            mvwprintw(editor_panel, row, col, "%*d", digit_count, actual_row);
+            wattroff(editor_panel, COLOR_PAIR(LINE_NUMBER_COLOR_PAIR));
+            col += digit_count + 1;
+        }
+
+        mvwaddch(editor_panel, row, col, current_char);
+        ++col;
+    }
+
+    wnoutrefresh(editor_panel);
 }
 
 void draw_output_panel(UIState* state) {

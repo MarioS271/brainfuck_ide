@@ -8,6 +8,13 @@
 
 #pragma once
 
+#include <stddef.h>
+
+// Color Pairs
+#define HIGHLIGHT_COLOR_PAIR 1
+#define LINE_NUMBER_COLOR_PAIR 2
+
+
 // Panel Bounds and Seperator Coords
 // Positions
 #define EDITOR_PANEL_X 0
@@ -51,13 +58,23 @@
 
 
 // Editor Panel
-#define EDITOR_PADDING_X 3
-#define EDITOR_PADDING_Y 2
+#define EDITOR_BUFFER_SIZE 131'072   // 128 KiB
+#define EDITOR_PADDING_X 2
+#define EDITOR_PADDING_Y 1
+#define EDITOR_DRAWABLE_WIDTH (EDITOR_PANEL_WIDTH - (EDITOR_PADDING_X * 2))
+#define EDITOR_DRAWABLE_HEIGHT (EDITOR_PANEL_HEIGHT - (EDITOR_PADDING_Y * 2))
 
 
-// Data Structure
+// Data Structures
+// Structs
 typedef struct {
     int last_event;
+
+    char* editor_buffer;
+    size_t editor_buffer_len;
+
+    bool in_menubar;
+    int current_menubar_option;
 
     struct _Dirty {
         bool panel_borders;
@@ -71,7 +88,6 @@ typedef struct {
     struct _CursorPos {
         int x;
         int y;
-        bool in_menubar;
     };
     struct _CursorPos cursor_pos;
 } UIState;
@@ -81,7 +97,7 @@ typedef struct {
 void init_ui();
 void shutdown_ui();
 
-void resize_and_clear_ui();
+void resize_ui();
 
 void draw_menubar();
 void draw_panel_borders();

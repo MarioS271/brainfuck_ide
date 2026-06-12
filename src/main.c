@@ -15,14 +15,7 @@
 #include "ui/ui.h"
 #include "interpreter/interpreter.h"
 
-#undef KEY_BACKSPACE
-
-#define KEY_ESC 27
-#define KEY_BACKSPACE 8
-#define KEY_DELETE 330
-
-// Uncomment if you wish to log key presses into a file called "./input.log"
-#define LOG_KEY_PRESSES
+#include "macros.h"
 
 int main(void) {
 #ifdef LOG_KEY_PRESSES

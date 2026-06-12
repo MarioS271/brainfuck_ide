@@ -7,6 +7,7 @@
  */
 
 #include "ui/ui.h"
+#include "macros.h"
 
 void move_cursor_up(UIState* state) {
     int idx = state->cursor_pos;
@@ -74,7 +75,7 @@ void move_to_line_end(UIState* state) {
 bool is_typable_char(UIState* state) {
     const int c = state->last_event;
 
-    if (c >= ' ' && c <= 'z')
+    if ((c >= ' ' && c <= 'z') || c == KEY_ENTER)
         return true;
 
     return false;

@@ -6,60 +6,18 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <PDCurses/curses.h>
 
+#include "helpers.h"
 #include "ui/ui.h"
 #include "interpreter/interpreter.h"
 
 #ifndef KEY_ESC
 #define KEY_ESC 27
 #endif
-
-static void move_cursor_up(UIState* state) {
-    int idx = state->cursor_pos;
-
-    while (idx > 0 && state->editor_buffer[idx - 1] != '\n')
-        --idx;
-
-    if (idx == 0)
-        return;
-
-    int prev_line_start = idx - 1;
-    while (prev_line_start > 0 && state->editor_buffer[prev_line_start - 1] != '\n')
-        --prev_line_start;
-
-    const int prev_len = (idx - 1) - prev_line_start;
-    const int original_cols = state->cursor_pos - idx;
-
-    state->cursor_pos = prev_line_start + (original_cols < prev_len ? original_cols : prev_len);
-    state->dirty.editor = true;
-}
-
-static void move_cursor_down(UIState* state) {
-    int line_start = state->cursor_pos;
-    while (line_start > 0 && state->editor_buffer[line_start - 1] != '\n')
-        --line_start;
-
-    const int col = state->cursor_pos - line_start;
-
-    int line_end = state->cursor_pos;
-    while (line_end < state->editor_buffer_len && state->editor_buffer[line_end] != '\n')
-        ++line_end;
-
-    if (line_end >= state->editor_buffer_len)
-        return;
-
-    const int next_line_start = line_end + 1;
-    int next_line_end = next_line_start;
-    while (next_line_end < state->editor_buffer_len && state->editor_buffer[next_line_end] != '\n')
-        ++next_line_end;
-
-    const int next_len = next_line_end - next_line_start;
-    state->cursor_pos = next_line_start + (col < next_len ? col : next_len);
-    state->dirty.editor = true;
-}
 
 int main(void) {
     init_ui();
@@ -79,7 +37,7 @@ int main(void) {
         "[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]\n"
         ">>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.\n"
         "++++++++++[>+++++++>++++++++++>+++>+<<<<-]\n"
-        ">++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.\n"
+        ">++.>+.+++++++..+++.>++.<<+++,++++++++++++.>.+++.------.--------.>+.>.\n"
         "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.\n"
         "\n"
         "[-]\n"
@@ -87,7 +45,7 @@ int main(void) {
         "++++++[>++++++++<-]>.\n"
         "<+++++[>+++++<-]>.\n"
         "[-]++++++++[>++++++++<-]>+.\n"
-        "<++++++[>------<-]>-.\n"
+        "<++++,+[>---,---<-]>-.\n"
         "+++++++++++++.\n"
         "---------.\n"
         "++++++.\n"
@@ -97,9 +55,9 @@ int main(void) {
         "+++++++[>+++++++<-]>.\n"
         "<<++++[>++++++++<-]>[<++++>-]\n"
         "+<[>-<[>>+<<-]]>>[<<+>>-]<[>+<-]\n"
-        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>+.\n"
-        "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-.\n"
-        "++++++++++\n"
+        ">>>>>>>>>>>>>>>>>>>>>>>>>>,>>>>>>>>>>>>>>>>>>>>>>>>>>>>,>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>+.\n"
+        "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-.\n"
+        "+++++++,+++\n"
         "[>+>+++>+++++++>++++++++++<<<<-]\n"
         ">>>++.\n"
         "<<++.\n"
@@ -109,7 +67,7 @@ int main(void) {
         "+++.\n"
         "------.\n"
         "<<<.\n"
-        ">>>--------.\n"
+        ">>>-,-------.\n"
         "<<<+.\n"
         "[-]>[-]>[-]>[-]<<<\n"
         "++++++++[>++++++++>+++++++++>++++++++++<<<-]\n"
@@ -119,8 +77,30 @@ int main(void) {
         ">>+++.\n"
         ">----.\n"
         "[-]<[-]<[-]\n"
-        "+++++++++++[>++++++++++[>+<-]<-]\n"
-        ">>+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.\n";
+        "+++++,++++++[>++++++++++[>+<-]<-]\n"
+        ">>+++++++++++++++++++++,,,++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.\n"
+        "[>+>+++>+++++++>++++++++++<<<<-]\n"
+        ">>>++.\n"
+        "<<++.\n"
+        ">>+++++++.\n"
+        "<<<+++.\n"
+        ">>>.\n"
+        "+++.\n"
+        "------.\n"
+        "<<<.\n"
+        ">>>-,-------.\n"
+        "<<<+.\n"
+        "[-]>[-]>[-]>[-]<<<\n"
+        "++++++++[>++++++++>+++++++++>++++++++++<<<-]\n"
+        ">+.>++.>+++.\n"
+        "<<<[-]\n"
+        "+++++[>+++++[>+++>++++<<-]<-]\n"
+        ">>+++.\n"
+        ">----.\n"
+        "[-]<[-]<[-]\n"
+        "+++++,++++++[>++++++++++[>+<-]<-]\n"
+        ">>+++++++++++++++++++++,,,++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.\n"
+        "\n\n\n\n dadadad\n\n\n dad";
     state.editor_buffer = prog;
     state.editor_buffer_len = strlen(prog);
 
@@ -184,16 +164,10 @@ int main(void) {
                     break;
 
                 case KEY_HOME:
-                    if (state.cursor_pos != 0) {
-                        state.dirty.editor = true;
-                        state.cursor_pos = 0;
-                    }
+                    move_to_line_start(&state);
                     break;
                 case KEY_END:
-                    if (state.cursor_pos != state.editor_buffer_len) {
-                        state.dirty.editor = true;
-                        state.cursor_pos = state.editor_buffer_len;
-                    }
+                    move_to_line_end(&state);
                     break;
 
                 case KEY_LEFT:
@@ -215,8 +189,31 @@ int main(void) {
                     move_cursor_down(&state);
                     break;
 
+                case KEY_BACKSPACE:
+
+                    --state.editor_buffer_len;
+                    --state.cursor_pos;
+                    break;
+
                 default:
-                    valid = false;
+                    if (is_typable_char(&state)
+                        && state.editor_buffer_len < EDITOR_BUFFER_SIZE
+                        && state.cursor_pos <= state.editor_buffer_len)
+                    {
+                        memmove(
+                            state.editor_buffer + state.cursor_pos + 1,
+                            state.editor_buffer + state.cursor_pos,
+                            state.editor_buffer_len - state.cursor_pos
+                        );
+
+                        state.editor_buffer[state.cursor_pos] = (char)state.last_event;
+
+                        ++state.editor_buffer_len;
+                        ++state.cursor_pos;
+                        state.dirty.editor = true;
+                    } else {
+                        valid = false;
+                    }
                     break;
             }
         }

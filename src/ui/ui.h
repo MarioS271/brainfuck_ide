@@ -8,11 +8,16 @@
 
 #pragma once
 
-#include <stddef.h>
+#include <PDCurses/curses.h>
 
 // Color Pairs
+#define DEFAULT_COLOR_PAIR 0
 #define HIGHLIGHT_COLOR_PAIR 1
-#define LINE_NUMBER_COLOR_PAIR 2
+#define PTR_OP_COLOR_PAIR 2
+#define VAL_OP_COLOR_PAIR 3
+#define OUT_OP_COLOR_PAIR 4
+#define IN_OP_COLOR_PAIR 5
+#define LOOP_OP_COLOR_PAIR 6
 
 
 // Panel Bounds and Seperator Coords
@@ -63,6 +68,15 @@
 #define EDITOR_PADDING_Y 1
 #define EDITOR_DRAWABLE_WIDTH (EDITOR_PANEL_WIDTH - (EDITOR_PADDING_X * 2))
 #define EDITOR_DRAWABLE_HEIGHT (EDITOR_PANEL_HEIGHT - (EDITOR_PADDING_Y * 2))
+
+
+// Globals
+extern WINDOW* editor_panel;
+extern WINDOW* output_panel;
+extern WINDOW* tape_panel;
+extern int editor_cursor_x;
+extern int editor_cursor_y;
+extern int editor_scroll;
 
 
 // Data Structures

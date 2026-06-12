@@ -15,14 +15,24 @@
 #include "ui/ui.h"
 #include "interpreter/interpreter.h"
 
-#ifndef KEY_ESC
+#undef KEY_BACKSPACE
+
 #define KEY_ESC 27
-#endif
+#define KEY_BACKSPACE 8
+#define KEY_DELETE 330
+
+// Uncomment if you wish to log key presses into a file called "./input.log"
+#define LOG_KEY_PRESSES
 
 int main(void) {
+#ifdef LOG_KEY_PRESSES
+    FILE* key_log_file = fopen("input.log", "w");
+#endif
+
     init_ui();
 
     UIState state;
+    int exitcode;
 
     state.last_event = 0;
 
@@ -100,7 +110,7 @@ int main(void) {
         "[-]<[-]<[-]\n"
         "+++++,++++++[>++++++++++[>+<-]<-]\n"
         ">>+++++++++++++++++++++,,,++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.\n"
-        "\n\n\n\n dadadad\n\n\n dad";
+        "\n\n\n\ndadadad\n\n\ndad";
     state.editor_buffer = prog;
     state.editor_buffer_len = strlen(prog);
 
@@ -148,6 +158,15 @@ int main(void) {
             valid = true;
             state.last_event = getch();
 
+#ifdef LOG_KEY_PRESSES
+            fprintf(
+                key_log_file,
+                "char %c  |  ascii %3d\n",
+                (char)state.last_event,
+                (int)state.last_event
+            );
+#endif
+
             switch (state.last_event) {
                 case KEY_ESC:
                     state.in_menubar = !state.in_menubar;
@@ -190,9 +209,32 @@ int main(void) {
                     break;
 
                 case KEY_BACKSPACE:
+                    if (state.cursor_pos == 0)
+                        break;
+
+                    memmove(
+                        state.editor_buffer + state.cursor_pos - 1,
+                        state.editor_buffer + state.cursor_pos,
+                        state.editor_buffer_len - state.cursor_pos
+                    );
 
                     --state.editor_buffer_len;
                     --state.cursor_pos;
+                    state.dirty.editor = true;
+                    break;
+
+                case KEY_DELETE:
+                    if (state.cursor_pos == state.editor_buffer_len)
+                        break;
+
+                    memmove(
+                        state.editor_buffer + state.cursor_pos,
+                        state.editor_buffer + state.cursor_pos + 1,
+                        state.editor_buffer_len - state.cursor_pos - 1
+                    );
+
+                    --state.editor_buffer_len;
+                    state.dirty.editor = true;
                     break;
 
                 default:
@@ -220,10 +262,17 @@ int main(void) {
     }
 
 exit_success:
-    shutdown_ui();
-    return 0;
+    exitcode = 0;
+    goto exit;
 
 exit_failure:
+    exitcode = 1;
+    goto exit;
+
+exit:
     shutdown_ui();
-    return 0;
+#ifdef LOG_KEY_PRESSES
+    fclose(key_log_file);
+#endif
+    return exitcode;
 }

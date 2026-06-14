@@ -19,7 +19,7 @@ void run_brainfuck(
     int (*read_input)(void))
 {
     uint8_t tape[TAPE_LEN] = {};
-    int data_ptr = 0;
+    unsigned int data_ptr = 0;
 
     memset(state->output_buffer, 0, state->output_buffer_len);
     state->output_buffer_len = 0;
@@ -27,20 +27,20 @@ void run_brainfuck(
     for (int i = 0; i < prog_len; ++i) {
         switch (prog[i]) {
             case INCREMENT_PTR: {
-                ++data_ptr;
+                if (data_ptr < TAPE_LEN) ++data_ptr;
                 break;
             }
             case DECREMENT_PTR: {
-                --data_ptr;
+                if (data_ptr > 0) --data_ptr;
                 break;
             }
 
             case INCREMENT_VAR: {
-                ++tape[data_ptr];
+                if (tape[data_ptr] < 255) ++tape[data_ptr];
                 break;
             }
             case DECREMENT_VAR: {
-                --tape[data_ptr];
+                if (tape[data_ptr] > 0) --tape[data_ptr];
                 break;
             }
 

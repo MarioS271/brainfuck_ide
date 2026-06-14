@@ -24,7 +24,7 @@ void init_ui() {
     noecho();
     cbreak();
     keypad(stdscr, true);
-    curs_set(2);
+    curs_set(0);
 
     init_pair(HIGHLIGHT_COLOR_PAIR, COLOR_BLACK, COLOR_WHITE);
     init_pair(PTR_OP_COLOR_PAIR, COLOR_MAGENTA, COLOR_BLACK);

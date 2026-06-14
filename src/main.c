@@ -1,7 +1,7 @@
 /**
  * @file main.c
  * @authors MarioS271
- * 
+ *
  * SPDX-FileCopyrightText: (C) MarioS271 2026
  * SPDX-License-Identifier: GPL-3.0-only
  */
@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <PDCurses/curses.h>
 
 #include "helpers.h"
@@ -21,11 +22,14 @@ int _return_E() {
     return 'e';
 }
 
+// TODO: add debug mode
+
 int main(void) {
 #ifdef LOG_KEY_PRESSES
     FILE* key_log_file = fopen("input.log", "w");
 #endif
 
+    srand(time(nullptr));
     init_ui();
 
     UIState state;
@@ -104,7 +108,7 @@ int main(void) {
     //     ">>+++++++++++++++++++++,,,++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.\n"
     //     "\n\n\n\ndadadad\n\n\ndad";
     char prog[] = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
-    state.editor_buffer = prog;
+    strcpy(state.editor_buffer, prog);
     state.editor_buffer_len = strlen(prog);
 
     state.output_buffer = malloc(OUTPUT_BUFFER_SIZE);
@@ -210,6 +214,7 @@ int main(void) {
                             state.current_menubar_option = MENUBAR_NUM_ITEMS - 1;
                     } else if (state.cursor_pos > 0) {
                         state.dirty.editor = true;
+                        state.dirty.tape = true;
                         --state.cursor_pos;
                     } else {
                         valid = false;
@@ -224,6 +229,7 @@ int main(void) {
                             state.current_menubar_option = 0;
                     } else if (state.cursor_pos < state.editor_buffer_len) {
                         state.dirty.editor = true;
+                        state.dirty.tape = true;
                         ++state.cursor_pos;
                     } else {
                         valid = false;
@@ -259,6 +265,7 @@ int main(void) {
                     --state.editor_buffer_len;
                     --state.cursor_pos;
                     state.dirty.editor = true;
+                    state.dirty.tape = true;
                     break;
 
                 case KEY_DELETE:
@@ -275,6 +282,7 @@ int main(void) {
 
                     --state.editor_buffer_len;
                     state.dirty.editor = true;
+                    state.dirty.tape = true;
                     break;
 
                 default:
@@ -305,7 +313,7 @@ int main(void) {
                                 break;
                         }
                     }
-                    else if (is_typable_char(&state)
+                    else if (is_typable_char((char)state.last_event)
                         && state.editor_buffer_len < EDITOR_BUFFER_SIZE
                         && state.cursor_pos <= state.editor_buffer_len
                         && !state.in_menubar)
@@ -321,6 +329,7 @@ int main(void) {
                         ++state.editor_buffer_len;
                         ++state.cursor_pos;
                         state.dirty.editor = true;
+                        state.dirty.tape = true;
                     } else {
                         valid = false;
                     }

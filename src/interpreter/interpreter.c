@@ -21,20 +21,18 @@ void loop_begin(
     int* const i,
     const uint8_t tape[],
     const unsigned int* const data_ptr,
-    UIState* state,
-    const char* const prog,
-    const size_t prog_len)
+    UIState* state)
 {
     if (tape[*data_ptr] == 0) {
         int depth = 1;
         while (depth != 0) {
             ++(*i);
-            if (*i >= prog_len) {
+            if (*i >= state->editor_buffer_len) {
                 print_malformed_loop(state);
                 return;
             }
-            if (prog[*i] == LOOP_BEGIN) depth++;
-            if (prog[*i] == LOOP_END) depth--;
+            if (state->editor_buffer[*i] == LOOP_BEGIN) depth++;
+            if (state->editor_buffer[*i] == LOOP_END) depth--;
         }
     }
 }
@@ -43,8 +41,7 @@ void loop_end(
     int* const i,
     const uint8_t tape[],
     const unsigned int* const data_ptr,
-    UIState* state,
-    const char* const prog)
+    UIState* state)
 {
     if (tape[*data_ptr] != 0) {
         int depth = 1;
@@ -54,8 +51,8 @@ void loop_end(
                 print_malformed_loop(state);
                 return;
             }
-            if (prog[*i] == LOOP_END) depth++;
-            if (prog[*i] == LOOP_BEGIN) depth--;
+            if (state->editor_buffer[*i] == LOOP_END) depth++;
+            if (state->editor_buffer[*i] == LOOP_BEGIN) depth--;
         }
     }
 }
@@ -114,9 +111,7 @@ void run_brainfuck(
                     &i,
                     tape,
                     &data_ptr,
-                    state,
-                    prog,
-                    prog_len
+                    state
                 );
                 break;
             }
@@ -125,8 +120,7 @@ void run_brainfuck(
                     &i,
                     tape,
                     &data_ptr,
-                    state,
-                    prog
+                    state
                 );
                 break;
             }
@@ -137,21 +131,13 @@ void run_brainfuck(
 }
 
 void generate_tape(
-    uint8_t* tape[],
+    uint8_t tape[],
     unsigned int* data_ptr,
     UIState* state,
-    const char* const prog,
-    const size_t prog_len,
     int (*read_input)(void))
 {
-    memset(*tape, 0, TAPE_LEN);
-    *data_ptr = 0;
-
-    memset(state->output_buffer, 0, OUTPUT_BUFFER_SIZE);
-    state->output_buffer_len = 0;
-
-    for (int i = 0; i < prog_len; ++i) {
-        switch (prog[i]) {
+    for (int i = 0; i < state->cursor_pos; ++i) {
+        switch (state->editor_buffer[i]) {
             case INCREMENT_PTR: {
                 if (*data_ptr < TAPE_LEN - 1) ++(*data_ptr);
                 break;
@@ -162,37 +148,34 @@ void generate_tape(
             }
 
             case INCREMENT_VAR: {
-                if ((*tape)[*data_ptr] < 255) ++(*tape)[*data_ptr];
+                if (tape[*data_ptr] < 255) ++tape[*data_ptr];
                 break;
             }
             case DECREMENT_VAR: {
-                if ((*tape)[*data_ptr] > 0) --(*tape)[*data_ptr];
+                if (tape[*data_ptr] > 0) --tape[*data_ptr];
                 break;
             }
 
             case INPUT_BYTE: {
-                (*tape)[*data_ptr] = read_input();
+                tape[*data_ptr] = read_input();
                 break;
             }
 
             case LOOP_BEGIN: {
                 loop_begin(
                     &i,
-                    *tape,
+                    tape,
                     data_ptr,
-                    state,
-                    prog,
-                    prog_len
+                    state
                 );
                 break;
             }
             case LOOP_END: {
                 loop_end(
                     &i,
-                    *tape,
+                    tape,
                     data_ptr,
-                    state,
-                    prog
+                    state
                 );
                 break;
             }

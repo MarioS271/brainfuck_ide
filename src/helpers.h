@@ -15,4 +15,4 @@ void move_cursor_down(UIState* state);
 void move_to_line_start(UIState* state);
 void move_to_line_end(UIState* state);
 
-bool is_typable_char(UIState* state);
+bool is_typable_char(char c);

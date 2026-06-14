@@ -8,9 +8,10 @@
 
 #pragma once
 
+#include <stdint.h>
 #include "../ui/ui.h"
 
-#define TAPE_LEN 300'000
+#define TAPE_LEN 1'000
 
 #define INCREMENT_PTR '>'
 #define DECREMENT_PTR '<'
@@ -25,5 +26,12 @@ void run_brainfuck(
     UIState* state,
     const char* prog,
     size_t prog_len,
+    int (*read_input)(void)
+);
+
+void generate_tape(
+    uint8_t tape[],
+    unsigned int* data_ptr,
+    UIState* state,
     int (*read_input)(void)
 );

@@ -27,6 +27,7 @@ void move_cursor_up(UIState* state) {
 
     state->cursor_pos = prev_line_start + (original_cols < prev_len ? original_cols : prev_len);
     state->dirty.editor = true;
+    state->dirty.tape = true;
 }
 
 void move_cursor_down(UIState* state) {
@@ -51,6 +52,7 @@ void move_cursor_down(UIState* state) {
     const int next_len = next_line_end - next_line_start;
     state->cursor_pos = next_line_start + (col < next_len ? col : next_len);
     state->dirty.editor = true;
+    state->dirty.tape = true;
 }
 
 void move_to_line_start(UIState* state) {
@@ -69,12 +71,11 @@ void move_to_line_end(UIState* state) {
 
     state->cursor_pos = line_end;
     state->dirty.editor = true;
+    state->dirty.tape = true;
 }
 
 
-bool is_typable_char(UIState* state) {
-    const int c = state->last_event;
-
+bool is_typable_char(char c) {
     if ((c >= ' ' && c <= 'z') || c == KEY_ENTER)
         return true;
 

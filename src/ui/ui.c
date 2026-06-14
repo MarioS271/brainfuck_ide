@@ -46,8 +46,14 @@ void shutdown_ui() {
     endwin();
 }
 
-void ui_set_cursor_pos() {
+void ui_set_cursor_pos(UIState* state) {
     move(EDITOR_PANEL_Y + editor_cursor_y, EDITOR_PANEL_X + editor_cursor_x);
+
+    if (!state->in_menubar)
+        curs_set(2);
+    else
+        curs_set(0);
+
     wnoutrefresh(stdscr);
 }
 
@@ -64,7 +70,7 @@ void resize_ui() {
     mvwin(tape_panel, TAPE_PANEL_Y, TAPE_PANEL_X);
 }
 
-void draw_menubar() {
+void draw_menubar(UIState* state) {
     constexpr wchar_t symbol = L'═';
     cchar_t fill;
 
@@ -74,10 +80,47 @@ void draw_menubar() {
         mvadd_wch(0, x, &fill);
     }
 
-    mvprintw(MENUBAR_Y, MENUBAR_RUN_POS, MENUBAR_RUN_TEXT);
-    mvprintw(MENUBAR_Y, MENUBAR_SAVE_POS, MENUBAR_SAVE_TEXT);
-    mvprintw(MENUBAR_Y, MENUBAR_LOAD_POS, MENUBAR_LOAD_TEXT);
-    mvprintw(MENUBAR_Y, MENUBAR_EXIT_POS, MENUBAR_EXIT_TEXT);
+    int pos = 0;
+    char text[10] = {};
+
+    for (int i = 0; i < 4; ++i) {
+        switch (i) {
+            case 0:
+                pos = MENUBAR_RUN_POS;
+                memcpy(text, MENUBAR_RUN_TEXT, strlen(MENUBAR_RUN_TEXT));
+                break;
+
+            case 1:
+                pos = MENUBAR_SAVE_POS;
+                memcpy(text, MENUBAR_SAVE_TEXT, strlen(MENUBAR_SAVE_TEXT));
+                break;
+
+            case 2:
+                pos = MENUBAR_LOAD_POS;
+                memcpy(text, MENUBAR_LOAD_TEXT, strlen(MENUBAR_LOAD_TEXT));
+                break;
+
+            case 3:
+                pos = MENUBAR_EXIT_POS;
+                memcpy(text, MENUBAR_EXIT_TEXT, strlen(MENUBAR_EXIT_TEXT));
+                break;
+
+            default:
+                break;
+        }
+
+        bool selected = state->current_menubar_option == i && state->in_menubar;
+
+        mvprintw(MENUBAR_Y, pos, " ");
+
+        if (selected)
+            wattron(stdscr, COLOR_PAIR(HIGHLIGHT_COLOR_PAIR));
+        mvprintw(MENUBAR_Y, pos + 1, text);
+        if (selected)
+            wattroff(stdscr, COLOR_PAIR(HIGHLIGHT_COLOR_PAIR));
+
+        mvprintw(MENUBAR_Y, pos + 1 + strlen(text), " ");
+    }
 
     wnoutrefresh(stdscr);
 }

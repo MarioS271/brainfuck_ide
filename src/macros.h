@@ -9,7 +9,7 @@
 #pragma once
 
 // Uncomment if you wish to log key presses into a file called "./input.log"
-#define LOG_KEY_PRESSES
+// #define LOG_KEY_PRESSES
 
 #undef KEY_BACKSPACE
 #undef KEY_ENTER
@@ -18,3 +18,4 @@
 #define KEY_BACKSPACE 8
 #define KEY_DELETE 330
 #define KEY_ENTER '\n'
+#define KEY_SPACE ' '

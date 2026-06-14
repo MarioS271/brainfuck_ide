@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "../ui/ui.h"
+
 #define TAPE_LEN 300'000
 
 #define INCREMENT_PTR '>'
@@ -19,4 +21,9 @@
 #define LOOP_BEGIN '['
 #define LOOP_END ']'
 
-void run_brainfuck(char* prog, int len);
+void run_brainfuck(
+    UIState* state,
+    const char* prog,
+    size_t prog_len,
+    int (*read_input)(void)
+);

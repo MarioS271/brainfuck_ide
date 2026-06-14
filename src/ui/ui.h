@@ -45,21 +45,23 @@
 #define LOWER_PANEL_SEPERATOR_WIDTH COLS
 
 
-// Menu Bar Positions
+// Menu Bar
+#define MENUBAR_NUM_ITEMS 4
 // Text
-#define MENUBAR_RUN_TEXT " RUN "
-#define MENUBAR_SAVE_TEXT " SAVE "
-#define MENUBAR_LOAD_TEXT " LOAD "
-#define MENUBAR_EXIT_TEXT " EXIT "
+#define MENUBAR_RUN_TEXT "RUN"
+#define MENUBAR_SAVE_TEXT "SAVE"
+#define MENUBAR_LOAD_TEXT "LOAD"
+#define MENUBAR_EXIT_TEXT "EXIT"
 // Position Presets
 #define MENUBAR_Y 0
 #define MENUBAR_BASE_POS 4
 #define MENUBAR_OPTION_SPACING 2
+#define MENUBAR_OPTION_PADDING 1
 // Final Positions
 #define MENUBAR_RUN_POS MENUBAR_BASE_POS
-#define MENUBAR_SAVE_POS (MENUBAR_RUN_POS + MENUBAR_OPTION_SPACING + strlen(MENUBAR_RUN_TEXT))
-#define MENUBAR_LOAD_POS (MENUBAR_SAVE_POS + MENUBAR_OPTION_SPACING + strlen(MENUBAR_LOAD_TEXT))
-#define MENUBAR_EXIT_POS (COLS - MENUBAR_BASE_POS - strlen(MENUBAR_EXIT_TEXT))
+#define MENUBAR_SAVE_POS (MENUBAR_RUN_POS + MENUBAR_OPTION_SPACING + strlen(MENUBAR_RUN_TEXT) + (MENUBAR_OPTION_PADDING * 2))
+#define MENUBAR_LOAD_POS (MENUBAR_SAVE_POS + MENUBAR_OPTION_SPACING + strlen(MENUBAR_LOAD_TEXT) + (MENUBAR_OPTION_PADDING * 2))
+#define MENUBAR_EXIT_POS (COLS - MENUBAR_BASE_POS - strlen(MENUBAR_EXIT_TEXT) - (MENUBAR_OPTION_PADDING * 2))
 
 
 // Editor Panel
@@ -70,10 +72,19 @@
 #define EDITOR_DRAWABLE_HEIGHT (EDITOR_PANEL_HEIGHT - (EDITOR_PADDING_Y * 2))
 
 
+// Output Panel
+#define OUTPUT_BUFFER_SIZE 32'768   // 32 KiB
+#define OUTPUT_PADDING_X 2
+#define OUTPUT_PADDING_Y 1
+#define OUTPUT_DRAWABLE_WIDTH (OUTPUT_PANEL_WIDTH - (OUTPUT_PADDING_X * 2))
+#define OUTPUT_DRAWABLE_HEIGHT (OUTPUT_PANEL_HEIGHT - (OUTPUT_PADDING_Y * 2))
+
+
 // Globals
 extern WINDOW* editor_panel;
 extern WINDOW* output_panel;
 extern WINDOW* tape_panel;
+extern WINDOW* popup;
 extern int editor_cursor_x;
 extern int editor_cursor_y;
 extern int editor_scroll;
@@ -86,6 +97,9 @@ typedef struct {
 
     char* editor_buffer;
     size_t editor_buffer_len;
+
+    char* output_buffer;
+    size_t output_buffer_len;
 
     int cursor_pos;
 
@@ -108,9 +122,9 @@ void init_ui();
 void shutdown_ui();
 
 void resize_ui();
-void ui_set_cursor_pos();
+void ui_set_cursor_pos(UIState* state);
 
-void draw_menubar();
+void draw_menubar(UIState* state);
 void draw_panel_borders();
 void draw_editor_panel(UIState* state);
 void draw_output_panel(UIState* state);

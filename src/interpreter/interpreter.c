@@ -10,12 +10,21 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
-void run_brainfuck(char* prog, int len) {
+void run_brainfuck(
+    UIState* state,
+    const char* const prog,
+    const size_t prog_len,
+    int (*read_input)(void))
+{
     uint8_t tape[TAPE_LEN] = {};
     int data_ptr = 0;
 
-    for (int i = 0; i < len; ++i) {
+    memset(state->output_buffer, 0, state->output_buffer_len);
+    state->output_buffer_len = 0;
+
+    for (int i = 0; i < prog_len; ++i) {
         switch (prog[i]) {
             case INCREMENT_PTR: {
                 ++data_ptr;
@@ -36,12 +45,18 @@ void run_brainfuck(char* prog, int len) {
             }
 
             case OUTPUT_CHAR: {
-                printf("%c", tape[data_ptr]);
+                snprintf(
+                    state->output_buffer + state->output_buffer_len,
+                    OUTPUT_BUFFER_SIZE - state->output_buffer_len,
+                    "%c",
+                    tape[data_ptr]
+                );
+                ++state->output_buffer_len;
                 break;
             }
 
             case INPUT_BYTE: {
-                tape[data_ptr] = fgetc(stdin);
+                tape[data_ptr] = read_input();
                 break;
             }
 

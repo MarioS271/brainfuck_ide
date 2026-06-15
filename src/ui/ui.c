@@ -27,6 +27,7 @@ void init_ui() {
     curs_set(0);
 
     init_pair(HIGHLIGHT_COLOR_PAIR, COLOR_BLACK, COLOR_WHITE);
+    init_pair(DEBUG_BORDER_COLOR_PAIR, COLOR_BLUE, COLOR_BLACK);
     init_pair(PTR_OP_COLOR_PAIR, COLOR_MAGENTA, COLOR_BLACK);
     init_pair(VAL_OP_COLOR_PAIR, COLOR_YELLOW, COLOR_BLACK);
     init_pair(OUT_OP_COLOR_PAIR, COLOR_GREEN, COLOR_BLACK);
@@ -83,7 +84,9 @@ void draw_menubar(UIState* state) {
     int pos = 0;
     char text[10] = {};
 
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < MENUBAR_NUM_ITEMS; ++i) {
+        memset(text, 0, 10);
+
         switch (i) {
             case 0:
                 pos = MENUBAR_RUN_POS;
@@ -91,16 +94,21 @@ void draw_menubar(UIState* state) {
                 break;
 
             case 1:
+                pos = MENUBAR_DEBUG_POS;
+                memcpy(text, MENUBAR_DEBUG_TEXT, strlen(MENUBAR_DEBUG_TEXT));
+                break;
+
+            case 2:
                 pos = MENUBAR_SAVE_POS;
                 memcpy(text, MENUBAR_SAVE_TEXT, strlen(MENUBAR_SAVE_TEXT));
                 break;
 
-            case 2:
+            case 3:
                 pos = MENUBAR_LOAD_POS;
                 memcpy(text, MENUBAR_LOAD_TEXT, strlen(MENUBAR_LOAD_TEXT));
                 break;
 
-            case 3:
+            case 4:
                 pos = MENUBAR_EXIT_POS;
                 memcpy(text, MENUBAR_EXIT_TEXT, strlen(MENUBAR_EXIT_TEXT));
                 break;
@@ -125,12 +133,15 @@ void draw_menubar(UIState* state) {
     wnoutrefresh(stdscr);
 }
 
-void draw_panel_borders() {
+void draw_panel_borders(UIState* state) {
     constexpr wchar_t vertical_symbol = L'┃';
     constexpr wchar_t horizontal_symbol = L'━';
     constexpr wchar_t crossing_symbol = L'┻';
 
     cchar_t fill;
+
+    if (state->mode == Debug)
+        wattron(stdscr, COLOR_PAIR(DEBUG_BORDER_COLOR_PAIR));
 
     setcchar(&fill, &vertical_symbol, A_NORMAL, 0, nullptr);
     for (int y = UPPER_PANELS_SEPERATOR_Y; y < (UPPER_PANELS_SEPERATOR_Y + UPPER_PANELS_SEPERATOR_HEIGHT); ++y) {
@@ -138,12 +149,29 @@ void draw_panel_borders() {
     }
 
     setcchar(&fill, &horizontal_symbol, A_NORMAL, 0, nullptr);
+
+    char pc_debug_buffer[15];
+    snprintf(
+        pc_debug_buffer,
+        sizeof(pc_debug_buffer),
+        " PC: %06d ",
+        state->cursor_pos
+    );
+
     for (int x = LOWER_PANEL_SEPERATOR_X; x < LOWER_PANEL_SEPERATOR_WIDTH; ++x) {
-        mvadd_wch(LOWER_PANEL_SEPERATOR_Y, x, &fill);
+        if (state->mode == Debug && (x >= DEBUG_PC_COUNTER_X && x < DEBUG_PC_COUNTER_X + strlen(pc_debug_buffer))) {
+            if (!(x == DEBUG_PC_COUNTER_X)) continue;
+            mvprintw(LOWER_PANEL_SEPERATOR_Y, DEBUG_PC_COUNTER_X, "%s", pc_debug_buffer);
+        } else {
+            mvadd_wch(LOWER_PANEL_SEPERATOR_Y, x, &fill);
+        }
     }
 
     setcchar(&fill, &crossing_symbol, A_NORMAL, 0, nullptr);
     mvadd_wch(LOWER_PANEL_SEPERATOR_Y, UPPER_PANELS_SEPERATOR_X, &fill);
+
+    if (state->mode == Debug)
+        wattroff(stdscr, COLOR_PAIR(DEBUG_BORDER_COLOR_PAIR));
 
     wnoutrefresh(stdscr);
 }

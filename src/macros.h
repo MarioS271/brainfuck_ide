@@ -14,8 +14,15 @@
 #undef KEY_BACKSPACE
 #undef KEY_ENTER
 
+#define TAPE_LEN 1'000
+
 #define KEY_ESC 27
 #define KEY_BACKSPACE 8
 #define KEY_DELETE 330
 #define KEY_ENTER '\n'
 #define KEY_SPACE ' '
+#define KEY_TAB '\t'
+
+#define ASCII_NUL '\0'
+#define ASCII_CR '\r'
+#define ASCII_BEL '\7'

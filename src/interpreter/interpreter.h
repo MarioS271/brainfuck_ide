@@ -11,8 +11,6 @@
 #include <stdint.h>
 #include "../ui/ui.h"
 
-#define TAPE_LEN 1'000
-
 #define INCREMENT_PTR '>'
 #define DECREMENT_PTR '<'
 #define INCREMENT_VAR '+'
@@ -33,5 +31,6 @@ void generate_tape(
     uint8_t tape[],
     unsigned int* data_ptr,
     UIState* state,
-    int (*read_input)(void)
+    int (*read_input)(void),
+    bool write_output
 );

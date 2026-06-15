@@ -1,6 +1,7 @@
 # Brainfuck IDE
 
 A TUI-based IDE for writing, running, and debugging **brainfuck** programs, built with PDCurses.
+(i apologize for the insanely bad and messy code)
 
 ---
 

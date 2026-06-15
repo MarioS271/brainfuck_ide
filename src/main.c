@@ -22,8 +22,6 @@ int _return_E() {
     return 'e';
 }
 
-// TODO: add debug mode
-
 int main(void) {
 #ifdef LOG_KEY_PRESSES
     FILE* key_log_file = fopen("input.log", "w");
@@ -38,75 +36,7 @@ int main(void) {
     state.last_event = 0;
 
     state.editor_buffer = malloc(EDITOR_BUFFER_SIZE);
-    // char prog[] =
-    //     "++++++++\n"
-    //     "[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]\n"
-    //     ">>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.\n"
-    //     "++++++++++[>+++++++>++++++++++>+++>+<<<<-]\n"
-    //     ">++.>+.+++++++..+++.>++.<<+++,++++++++++++.>.+++.------.--------.>+.>.\n"
-    //     "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.\n"
-    //     "\n"
-    //     "[-]\n"
-    //     ">[-]<\n"
-    //     "++++++[>++++++++<-]>.\n"
-    //     "<+++++[>+++++<-]>.\n"
-    //     "[-]++++++++[>++++++++<-]>+.\n"
-    //     "<++++,+[>---,---<-]>-.\n"
-    //     "+++++++++++++.\n"
-    //     "---------.\n"
-    //     "++++++.\n"
-    //     "\n"
-    //     "[-]\n"
-    //     "\n"
-    //     "+++++++[>+++++++<-]>.\n"
-    //     "<<++++[>++++++++<-]>[<++++>-]\n"
-    //     "+<[>-<[>>+<<-]]>>[<<+>>-]<[>+<-]\n"
-    //     ">>>>>>>>>>>>>>>>>>>>>>>>>>,>>>>>>>>>>>>>>>>>>>>>>>>>>>>,>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>+.\n"
-    //     "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<-.\n"
-    //     "+++++++,+++\n"
-    //     "[>+>+++>+++++++>++++++++++<<<<-]\n"
-    //     ">>>++.\n"
-    //     "<<++.\n"
-    //     ">>+++++++.\n"
-    //     "<<<+++.\n"
-    //     ">>>.\n"
-    //     "+++.\n"
-    //     "------.\n"
-    //     "<<<.\n"
-    //     ">>>-,-------.\n"
-    //     "<<<+.\n"
-    //     "[-]>[-]>[-]>[-]<<<\n"
-    //     "++++++++[>++++++++>+++++++++>++++++++++<<<-]\n"
-    //     ">+.>++.>+++.\n"
-    //     "<<<[-]\n"
-    //     "+++++[>+++++[>+++>++++<<-]<-]\n"
-    //     ">>+++.\n"
-    //     ">----.\n"
-    //     "[-]<[-]<[-]\n"
-    //     "+++++,++++++[>++++++++++[>+<-]<-]\n"
-    //     ">>+++++++++++++++++++++,,,++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.\n"
-    //     "[>+>+++>+++++++>++++++++++<<<<-]\n"
-    //     ">>>++.\n"
-    //     "<<++.\n"
-    //     ">>+++++++.\n"
-    //     "<<<+++.\n"
-    //     ">>>.\n"
-    //     "+++.\n"
-    //     "------.\n"
-    //     "<<<.\n"
-    //     ">>>-,-------.\n"
-    //     "<<<+.\n"
-    //     "[-]>[-]>[-]>[-]<<<\n"
-    //     "++++++++[>++++++++>+++++++++>++++++++++<<<-]\n"
-    //     ">+.>++.>+++.\n"
-    //     "<<<[-]\n"
-    //     "+++++[>+++++[>+++>++++<<-]<-]\n"
-    //     ">>+++.\n"
-    //     ">----.\n"
-    //     "[-]<[-]<[-]\n"
-    //     "+++++,++++++[>++++++++++[>+<-]<-]\n"
-    //     ">>+++++++++++++++++++++,,,++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.\n"
-    //     "\n\n\n\ndadadad\n\n\ndad";
+
     char prog[] = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
     strcpy(state.editor_buffer, prog);
     state.editor_buffer_len = strlen(prog);
@@ -114,10 +44,14 @@ int main(void) {
     state.output_buffer = malloc(OUTPUT_BUFFER_SIZE);
     state.output_buffer_len = 0;
 
-    state.cursor_pos = 0;
-
+    state.mode = Normal;
     state.in_menubar = false;
+
+    state.cursor_pos = 0;
     state.current_menubar_option = 0;
+
+    memset(state.debug_pc_history, 0, sizeof(state.debug_pc_history));
+    state.debug_pc_index = 0;
 
     state.dirty.panel_borders = true;
     state.dirty.menubar = true;
@@ -143,11 +77,11 @@ int main(void) {
         {
             if (any_dirty) curs_set(0);
 
-            if (state.dirty.panel_borders) draw_panel_borders();
+            if (state.dirty.panel_borders) draw_panel_borders(&state);
             if (state.dirty.menubar) draw_menubar(&state);
             if (state.dirty.editor) draw_editor_panel(&state);
-            if (state.dirty.output) draw_output_panel(&state);
             if (state.dirty.tape) draw_tape_panel(&state);
+            if (state.dirty.output) draw_output_panel(&state);
 
             ui_set_cursor_pos(&state);
 
@@ -191,14 +125,14 @@ int main(void) {
                     break;
 
                 case KEY_HOME:
-                    if (state.in_menubar) {
+                    if (state.in_menubar || state.mode == Debug) {
                         valid = false;
                         break;
                     }
                     move_to_line_start(&state);
                     break;
                 case KEY_END:
-                    if (state.in_menubar) {
+                    if (state.in_menubar || state.mode == Debug) {
                         valid = false;
                         break;
                     }
@@ -212,13 +146,89 @@ int main(void) {
 
                         if (state.current_menubar_option < 0)
                             state.current_menubar_option = MENUBAR_NUM_ITEMS - 1;
-                    } else if (state.cursor_pos > 0) {
+                        break;
+                    }
+
+                    if (state.mode == Normal && state.cursor_pos > 0) {
                         state.dirty.editor = true;
                         state.dirty.tape = true;
                         --state.cursor_pos;
-                    } else {
-                        valid = false;
+                        break;
                     }
+
+                    if (state.mode == Debug && state.debug_pc_index > 0) {
+                        state.dirty.panel_borders = true;
+                        state.dirty.editor = true;
+                        state.dirty.output = true;
+                        state.dirty.tape = true;
+
+                        memset(state.debug_tape, 0, TAPE_LEN);
+                        state.debug_data_ptr = 0;
+
+                        memset(state.output_buffer, 0, state.output_buffer_len);
+                        state.output_buffer_len = 0;
+
+                        --state.debug_pc_index;
+
+                        for (int i = 0; i < state.debug_pc_index; ++i) {
+                            const char instr = state.editor_buffer[state.debug_pc_history[i]];
+
+                            switch (instr) {
+                                case INCREMENT_PTR:
+                                    if (state.debug_data_ptr < TAPE_LEN - 1) ++state.debug_data_ptr;
+                                    break;
+                                case DECREMENT_PTR:
+                                    if (state.debug_data_ptr > 0) --state.debug_data_ptr;
+                                    break;
+                                case INCREMENT_VAR:
+                                    if (state.debug_tape[state.debug_data_ptr] < 255) ++state.debug_tape[state.debug_data_ptr];
+                                    break;
+                                case DECREMENT_VAR:
+                                    if (state.debug_tape[state.debug_data_ptr] > 0) --state.debug_tape[state.debug_data_ptr];
+                                    break;
+                                case OUTPUT_CHAR:
+                                    if (state.output_buffer_len < OUTPUT_BUFFER_SIZE - 1) {
+                                        state.output_buffer[state.output_buffer_len++] = (char)state.debug_tape[state.debug_data_ptr];
+                                        state.output_buffer[state.output_buffer_len] = '\0';
+                                        state.dirty.output = true;
+                                    }
+                                    break;
+                                case INPUT_BYTE:
+                                    state.debug_tape[state.debug_data_ptr] = (uint8_t)_return_E();
+                                    break;
+                                // case LOOP_BEGIN:
+                                //     if (state.debug_tape[state.debug_data_ptr] == 0) {
+                                //         int depth = 1, j = state.cursor_pos;
+                                //         while (depth != 0 && j < (int)state.editor_buffer_len - 1) {
+                                //             ++j;
+                                //             if (state.editor_buffer[j] == LOOP_BEGIN) ++depth;
+                                //             if (state.editor_buffer[j] == LOOP_END)   --depth;
+                                //         }
+                                //         new_cursor_pos = j + 1;
+                                //     }
+                                //     break;
+                                // case LOOP_END:
+                                //     if (state.debug_tape[state.debug_data_ptr] != 0) {
+                                //         int depth = 1, j = state.cursor_pos;
+                                //         while (depth != 0 && j > 0) {
+                                //             --j;
+                                //             if (state.editor_buffer[j] == LOOP_END)   ++depth;
+                                //             if (state.editor_buffer[j] == LOOP_BEGIN) --depth;
+                                //         }
+                                //         new_cursor_pos = j + 1;
+                                //     }
+                                //     break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        state.cursor_pos = state.debug_pc_history[state.debug_pc_index];
+
+                        break;
+                    }
+
+                    valid = false;
                     break;
                 case KEY_RIGHT:
                     if (state.in_menubar) {
@@ -227,13 +237,85 @@ int main(void) {
 
                         if (state.current_menubar_option >= MENUBAR_NUM_ITEMS)
                             state.current_menubar_option = 0;
-                    } else if (state.cursor_pos < state.editor_buffer_len) {
+
+                        break;
+                    }
+
+                    if (state.mode == Normal && state.cursor_pos < state.editor_buffer_len) {
                         state.dirty.editor = true;
                         state.dirty.tape = true;
                         ++state.cursor_pos;
-                    } else {
-                        valid = false;
+
+                        break;
                     }
+
+                    if (state.mode == Debug
+                        && state.cursor_pos < state.editor_buffer_len
+                        && state.debug_pc_index < DEBUG_PC_HISTORY_SIZE - 1)
+                    {
+                        state.dirty.panel_borders = true;
+                        state.dirty.editor = true;
+                        state.dirty.tape = true;
+
+                        const char instr = state.editor_buffer[state.cursor_pos];
+                        int new_cursor_pos = state.cursor_pos + 1;
+
+                        switch (instr) {
+                            case INCREMENT_PTR:
+                                if (state.debug_data_ptr < TAPE_LEN - 1) ++state.debug_data_ptr;
+                                break;
+                            case DECREMENT_PTR:
+                                if (state.debug_data_ptr > 0) --state.debug_data_ptr;
+                                break;
+                            case INCREMENT_VAR:
+                                if (state.debug_tape[state.debug_data_ptr] < 255) ++state.debug_tape[state.debug_data_ptr];
+                                break;
+                            case DECREMENT_VAR:
+                                if (state.debug_tape[state.debug_data_ptr] > 0) --state.debug_tape[state.debug_data_ptr];
+                                break;
+                            case OUTPUT_CHAR:
+                                if (state.output_buffer_len < OUTPUT_BUFFER_SIZE - 1) {
+                                    state.output_buffer[state.output_buffer_len++] = (char)state.debug_tape[state.debug_data_ptr];
+                                    state.output_buffer[state.output_buffer_len] = '\0';
+                                    state.dirty.output = true;
+                                }
+                                break;
+                            case INPUT_BYTE:
+                                state.debug_tape[state.debug_data_ptr] = (uint8_t)_return_E();
+                                break;
+                            case LOOP_BEGIN:
+                                if (state.debug_tape[state.debug_data_ptr] == 0) {
+                                    int depth = 1, j = state.cursor_pos;
+                                    while (depth != 0 && j < (int)state.editor_buffer_len - 1) {
+                                        ++j;
+                                        if (state.editor_buffer[j] == LOOP_BEGIN) ++depth;
+                                        if (state.editor_buffer[j] == LOOP_END)   --depth;
+                                    }
+                                    new_cursor_pos = j + 1;
+                                }
+                                break;
+                            case LOOP_END:
+                                if (state.debug_tape[state.debug_data_ptr] != 0) {
+                                    int depth = 1, j = state.cursor_pos;
+                                    while (depth != 0 && j > 0) {
+                                        --j;
+                                        if (state.editor_buffer[j] == LOOP_END)   ++depth;
+                                        if (state.editor_buffer[j] == LOOP_BEGIN) --depth;
+                                    }
+                                    new_cursor_pos = j + 1;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+
+                        ++state.debug_pc_index;
+                        state.debug_pc_history[state.debug_pc_index] = new_cursor_pos;
+                        state.cursor_pos = new_cursor_pos;
+                        break;
+                    }
+
+                    valid = false;
                     break;
                 case KEY_UP:
                     if (state.in_menubar) {
@@ -251,7 +333,7 @@ int main(void) {
                     break;
 
                 case KEY_BACKSPACE:
-                    if (state.cursor_pos == 0 || state.in_menubar) {
+                    if (state.cursor_pos == 0 || state.in_menubar || state.mode == Debug) {
                         valid = false;
                         break;
                     }
@@ -269,7 +351,7 @@ int main(void) {
                     break;
 
                 case KEY_DELETE:
-                    if (state.cursor_pos == state.editor_buffer_len || state.in_menubar) {
+                    if (state.cursor_pos == state.editor_buffer_len || state.in_menubar || state.mode == Debug) {
                         valid = false;
                         break;
                     }
@@ -297,37 +379,75 @@ int main(void) {
                                     state.editor_buffer_len,
                                     _return_E
                                 );
+                                state.mode = Normal;
+                                state.dirty.panel_borders = true;
                                 state.dirty.output = true;
+                                state.dirty.tape = true;
                                 break;
 
                             case 1:
+                                if (state.mode == Normal) {
+                                    state.mode = Debug;
+
+                                    memset(state.debug_pc_history, 0, sizeof(state.debug_pc_history));
+                                    state.debug_pc_index = 0;
+
+                                    memset(state.debug_tape, 0, sizeof(state.debug_tape));
+                                    state.debug_data_ptr = 0;
+                                }
+                                else state.mode = Normal;
+
+                                state.cursor_pos = 0;
+
+                                memset(state.output_buffer, 0, OUTPUT_BUFFER_SIZE);
+                                state.output_buffer_len = 0;
+
+                                state.dirty.panel_borders = true;
+                                state.dirty.editor = true;
+                                state.dirty.output = true;
+                                state.dirty.tape = true;
                                 break;
 
                             case 2:
                                 break;
 
                             case 3:
+                                break;
+
+                            case 4:
                                 goto exit_success;
 
                             default:
                                 break;
                         }
+
+                        state.in_menubar = false;
+                        state.current_menubar_option = 0;
+                        state.dirty.menubar = true;
                     }
                     else if (is_typable_char((char)state.last_event)
                         && state.editor_buffer_len < EDITOR_BUFFER_SIZE
                         && state.cursor_pos <= state.editor_buffer_len
+                        && state.mode == Normal
                         && !state.in_menubar)
                     {
                         memmove(
-                            state.editor_buffer + state.cursor_pos + 1,
+                            state.editor_buffer + state.cursor_pos + (state.last_event == KEY_TAB ? TAB_SIZE : 1),
                             state.editor_buffer + state.cursor_pos,
                             state.editor_buffer_len - state.cursor_pos
                         );
 
-                        state.editor_buffer[state.cursor_pos] = (char)state.last_event;
+                        if (state.last_event == KEY_TAB) {
+                            for (int i = 0; i < TAB_SIZE; ++i)
+                                state.editor_buffer[state.cursor_pos + i] = ' ';
+                            state.editor_buffer_len += TAB_SIZE;
+                            state.cursor_pos += TAB_SIZE;
+                        } else {
+                            state.editor_buffer[state.cursor_pos] = (char)state.last_event;
+                            ++state.editor_buffer_len;
+                            ++state.cursor_pos;
+                        }
 
-                        ++state.editor_buffer_len;
-                        ++state.cursor_pos;
                         state.dirty.editor = true;
                         state.dirty.tape = true;
                     } else {

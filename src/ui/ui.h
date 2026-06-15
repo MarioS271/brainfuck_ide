@@ -1,7 +1,7 @@
 /**
  * @file ui.h
  * @authors MarioS271
- * 
+ *
  * SPDX-FileCopyrightText: (C) MarioS271 2026
  * SPDX-License-Identifier: GPL-3.0-only
  */
@@ -9,15 +9,18 @@
 #pragma once
 
 #include <PDCurses/curses.h>
+#include <stdint.h>
+#include "../macros.h"
 
 // Color Pairs
 #define DEFAULT_COLOR_PAIR 0
 #define HIGHLIGHT_COLOR_PAIR 1
-#define PTR_OP_COLOR_PAIR 2
-#define VAL_OP_COLOR_PAIR 3
-#define OUT_OP_COLOR_PAIR 4
-#define IN_OP_COLOR_PAIR 5
-#define LOOP_OP_COLOR_PAIR 6
+#define DEBUG_BORDER_COLOR_PAIR 2
+#define PTR_OP_COLOR_PAIR 3
+#define VAL_OP_COLOR_PAIR 4
+#define OUT_OP_COLOR_PAIR 5
+#define IN_OP_COLOR_PAIR 6
+#define LOOP_OP_COLOR_PAIR 7
 
 // Panel Bounds and Seperator Coords
 // Positions
@@ -43,10 +46,15 @@
 #define UPPER_PANELS_SEPERATOR_HEIGHT EDITOR_PANEL_HEIGHT
 #define LOWER_PANEL_SEPERATOR_WIDTH COLS
 
+// Debug Text Params
+#define DEBUG_PC_COUNTER_PREFIX "PC: "
+#define DEBUG_PC_COUNTER_X 4
+
 // Menu Bar
-#define MENUBAR_NUM_ITEMS 4
+#define MENUBAR_NUM_ITEMS 5
 // Text
 #define MENUBAR_RUN_TEXT "RUN"
+#define MENUBAR_DEBUG_TEXT "DEBUG"
 #define MENUBAR_SAVE_TEXT "SAVE"
 #define MENUBAR_LOAD_TEXT "LOAD"
 #define MENUBAR_EXIT_TEXT "EXIT"
@@ -57,8 +65,9 @@
 #define MENUBAR_OPTION_PADDING 1
 // Final Positions
 #define MENUBAR_RUN_POS MENUBAR_BASE_POS
-#define MENUBAR_SAVE_POS (MENUBAR_RUN_POS + MENUBAR_OPTION_SPACING + strlen(MENUBAR_RUN_TEXT) + (MENUBAR_OPTION_PADDING * 2))
-#define MENUBAR_LOAD_POS (MENUBAR_SAVE_POS + MENUBAR_OPTION_SPACING + strlen(MENUBAR_LOAD_TEXT) + (MENUBAR_OPTION_PADDING * 2))
+#define MENUBAR_DEBUG_POS (MENUBAR_RUN_POS + MENUBAR_OPTION_SPACING + strlen(MENUBAR_RUN_TEXT) + (MENUBAR_OPTION_PADDING * 2))
+#define MENUBAR_SAVE_POS (MENUBAR_DEBUG_POS + MENUBAR_OPTION_SPACING + strlen(MENUBAR_DEBUG_TEXT) + (MENUBAR_OPTION_PADDING * 2))
+#define MENUBAR_LOAD_POS (MENUBAR_SAVE_POS + MENUBAR_OPTION_SPACING + strlen(MENUBAR_SAVE_TEXT) + (MENUBAR_OPTION_PADDING * 2))
 #define MENUBAR_EXIT_POS (COLS - MENUBAR_BASE_POS - strlen(MENUBAR_EXIT_TEXT) - (MENUBAR_OPTION_PADDING * 2))
 
 // Editor Panel
@@ -69,7 +78,7 @@
 #define EDITOR_DRAWABLE_HEIGHT (EDITOR_PANEL_HEIGHT - (EDITOR_PADDING_Y * 2))
 
 // Output Panel
-#define OUTPUT_BUFFER_SIZE 32'768   // 32 KiB
+#define OUTPUT_BUFFER_SIZE 1'024   // 1 KiB
 #define OUTPUT_PADDING_X 2
 #define OUTPUT_PADDING_Y 1
 #define OUTPUT_DRAWABLE_WIDTH (OUTPUT_PANEL_WIDTH - (OUTPUT_PADDING_X * 2))
@@ -83,6 +92,10 @@
 #define TAPE_DRAWABLE_WIDTH (TAPE_PANEL_WIDTH - (TAPE_PADDING_X * 2))
 #define TAPE_MAX_VISIBLE_CELLS ((TAPE_DRAWABLE_WIDTH + TAPE_CELL_SPACING) / (TAPE_CELL_WIDTH + TAPE_CELL_SPACING))
 
+// Other
+#define DEBUG_PC_HISTORY_SIZE 1000
+#define TAB_SIZE 4
+
 
 // Globals
 extern WINDOW* editor_panel;
@@ -94,10 +107,19 @@ extern int editor_cursor_y;
 extern int editor_scroll;
 
 
-// Data Structures
+// Enums
+typedef enum {
+    Normal,
+    Debug,
+} UIMode;
+
+
 // Structs
 typedef struct {
     int last_event;
+
+    UIMode mode;
+    bool in_menubar;
 
     char* editor_buffer;
     size_t editor_buffer_len;
@@ -106,9 +128,13 @@ typedef struct {
     size_t output_buffer_len;
 
     int cursor_pos;
-
-    bool in_menubar;
     int current_menubar_option;
+
+    int debug_pc_history[DEBUG_PC_HISTORY_SIZE];
+    size_t debug_pc_index;
+
+    uint8_t debug_tape[TAPE_LEN];
+    unsigned int debug_data_ptr;
 
     struct _Dirty {
         bool panel_borders;
@@ -129,7 +155,7 @@ void resize_ui();
 void ui_set_cursor_pos(UIState* state);
 
 void draw_menubar(UIState* state);
-void draw_panel_borders();
+void draw_panel_borders(UIState* state);
 void draw_editor_panel(UIState* state);
 void draw_output_panel(UIState* state);
 void draw_tape_panel(UIState* state);

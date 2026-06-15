@@ -134,7 +134,8 @@ void generate_tape(
     uint8_t tape[],
     unsigned int* data_ptr,
     UIState* state,
-    int (*read_input)(void))
+    int (*read_input)(void),
+    const bool write_output)
 {
     for (int i = 0; i < state->cursor_pos; ++i) {
         switch (state->editor_buffer[i]) {
@@ -153,6 +154,19 @@ void generate_tape(
             }
             case DECREMENT_VAR: {
                 if (tape[*data_ptr] > 0) --tape[*data_ptr];
+                break;
+            }
+
+            case OUTPUT_CHAR: {
+                if (!write_output) break;
+                if (state->output_buffer_len >= OUTPUT_BUFFER_SIZE - 1) break;
+                snprintf(
+                    state->output_buffer + state->output_buffer_len,
+                    OUTPUT_BUFFER_SIZE - state->output_buffer_len,
+                    "%c",
+                    tape[*data_ptr]
+                );
+                ++state->output_buffer_len;
                 break;
             }
 

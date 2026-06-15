@@ -62,6 +62,7 @@ void move_to_line_start(UIState* state) {
 
     state->cursor_pos = line_start;
     state->dirty.editor = true;
+    state->dirty.tape = true;
 }
 
 void move_to_line_end(UIState* state) {
@@ -76,7 +77,7 @@ void move_to_line_end(UIState* state) {
 
 
 bool is_typable_char(char c) {
-    if ((c >= ' ' && c <= 'z') || c == KEY_ENTER)
+    if ((c >= ' ' && c <= 'z') || c == KEY_ENTER || c == KEY_TAB)
         return true;
 
     return false;

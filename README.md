@@ -20,6 +20,21 @@ A TUI-based IDE for writing, running, and debugging **brainfuck** programs, buil
 
 ---
 
+## Supported Platforms
+| OS      | Supported? |
+|---------|------------|
+| Windows | Yes        |
+| Linux   | Yes        |
+| macOS   | No         |
+
+---
+
+## How to try it yourself
+
+The IDE is self-contained. It does not need any external libraries or whatsoever. To run it, simply open the executable file.
+
+---
+
 ## Brainfuck Primer
 
 Brainfuck operates on an array of memory cells (the "tape"), each initialized to zero, with a pointer starting at the leftmost cell. There are only 8 commands:
@@ -48,3 +63,7 @@ For a full language reference, see the [Wikipedia article on Brainfuck](https://
 ---
 
 This project is licensed under the **GNU General Public License v3.0** (`GPL-3.0-only`). See the [LICENSE](LICENSE) file for details.
+
+---
+
+![The IDE](preview.png)

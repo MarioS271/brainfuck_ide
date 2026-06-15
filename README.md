@@ -24,8 +24,10 @@ A TUI-based IDE for writing, running, and debugging **brainfuck** programs, buil
 | OS      | Supported? |
 |---------|------------|
 | Windows | Yes        |
-| Linux   | Yes        |
+| Linux   | No         |
 | macOS   | No         |
+
+> If you are willing to add support for any of the unsupported platforms, I'd be happy to merge a PR! :) 
 
 ---
 

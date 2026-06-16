@@ -7,7 +7,9 @@
  */
 
 #include "popup.h"
+
 #include "handlers.h"
+#include <string.h>
 
 void create_popup_base() {
     werase(popup);
@@ -36,7 +38,7 @@ void create_popup_base() {
         mvwadd_wch(popup, y, POPUP_WIDTH - 1, &c);
 
 
-    // Upper Border
+    // Lower Border
     setcchar(&c, POPUP_BORDER_CORNER_LL, A_NORMAL, 0, nullptr);
     mvwadd_wch(popup, POPUP_HEIGHT - 1, 0, &c);
 
@@ -51,35 +53,42 @@ void create_popup_base() {
     wnoutrefresh(popup);
 }
 
-void open_save_popup(UIState* state) {
-    state->popup_active = true;
-    state->popup_has_textbox = true;
-    state->popup_refresh_handler = save_popup_refresh_handler;
-    state->popup_confirm_handler = save_popup_confirm_handler;
+void popup_init(UIState* state) {
+    state->popup.active = true;
+    state->popup.selected_button = Confirm;
 
     create_popup_base();
+    state->popup.refresh_handler(state);
+}
+
+void open_save_popup(UIState* state) {
+    state->popup.has_textbox = true;
+    memset(state->popup.textbox_contents, 0, sizeof(state->popup.textbox_contents));
+    state->popup.refresh_handler = save_popup_refresh_handler;
+    state->popup.confirm_handler = save_popup_confirm_handler;
+
+    popup_init(state);
 }
 
 void open_load_popup(UIState* state) {
-    state->popup_active = true;
-    state->popup_has_textbox = true;
-    state->popup_refresh_handler = load_popup_refresh_handler;
-    state->popup_confirm_handler = load_popup_confirm_handler;
+    state->popup.has_textbox = true;
+    memset(state->popup.textbox_contents, 0, sizeof(state->popup.textbox_contents));
+    state->popup.refresh_handler = load_popup_refresh_handler;
+    state->popup.confirm_handler = load_popup_confirm_handler;
 
-    create_popup_base();
+    popup_init(state);
 }
 
 void open_exit_popup(UIState* state) {
-    state->popup_active = true;
-    state->popup_has_textbox = false;
-    state->popup_refresh_handler = exit_popup_refresh_handler;
-    state->popup_confirm_handler = exit_popup_confirm_handler;
+    state->popup.has_textbox = false;
+    state->popup.refresh_handler = exit_popup_refresh_handler;
+    state->popup.confirm_handler = exit_popup_confirm_handler;
 
-    create_popup_base();
+    popup_init(state);
 }
 
 void close_popup(UIState* state) {
-    state->popup_active = false;
+    state->popup.active = false;
     clear();
     refresh();
     state->dirty.panel_borders = true;

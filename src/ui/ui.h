@@ -94,9 +94,10 @@
 
 // Popup
 #define POPUP_WIDTH 60
-#define POPUP_HEIGHT 15
+#define POPUP_HEIGHT 12
 #define POPUP_X_POS (COLS / 2 - POPUP_WIDTH / 2)
 #define POPUP_Y_POS (LINES / 2 - POPUP_HEIGHT / 2)
+#define POPUP_BUTTON_DISTANCE_FROM_CENTER 2
 
 // Other
 #define DEBUG_PC_HISTORY_SIZE 1000
@@ -118,6 +119,10 @@ typedef enum {
     Normal,
     Debug,
 } UIMode;
+typedef enum {
+    Confirm,
+    Cancel,
+} PopupSelectedButton;
 
 
 // Structs
@@ -127,10 +132,15 @@ typedef struct UIState {
     UIMode mode;
     bool in_menubar;
 
-    bool popup_active;
-    bool popup_has_textbox;
-    void (*popup_refresh_handler)(struct UIState* state);
-    void (*popup_confirm_handler)(struct UIState* state);
+    struct _Popup {
+        bool active;
+        PopupSelectedButton selected_button;
+        bool has_textbox;
+        char textbox_contents[64];
+        void (*refresh_handler)(struct UIState* state);
+        void (*confirm_handler)(struct UIState* state);
+    };
+    struct _Popup popup;
 
     char* editor_buffer;
     size_t editor_buffer_len;

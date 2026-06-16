@@ -31,13 +31,22 @@ int main(void) {
     srand(time(nullptr));
     init_ui();
 
-    UIState state;
     int exitcode;
+    UIState state;
 
     state.last_event = 0;
 
-    state.editor_buffer = malloc(EDITOR_BUFFER_SIZE);
+    state.mode = Normal;
+    state.in_menubar = false;
 
+    state.popup.active = false;
+    state.popup.selected_button = Confirm;
+    state.popup.has_textbox = false;
+    memset(state.popup.textbox_contents, 0, sizeof(state.popup.textbox_contents));
+    state.popup.refresh_handler = nullptr;
+    state.popup.confirm_handler = nullptr;
+
+    state.editor_buffer = malloc(EDITOR_BUFFER_SIZE);
     char prog[] = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
     strcpy(state.editor_buffer, prog);
     state.editor_buffer_len = strlen(prog);
@@ -45,14 +54,14 @@ int main(void) {
     state.output_buffer = malloc(OUTPUT_BUFFER_SIZE);
     state.output_buffer_len = 0;
 
-    state.mode = Normal;
-    state.in_menubar = false;
-
     state.cursor_pos = 0;
     state.current_menubar_option = 0;
 
     memset(state.debug_pc_history, 0, sizeof(state.debug_pc_history));
     state.debug_pc_index = 0;
+
+    memset(state.debug_tape, 0, TAPE_LEN);
+    state.debug_data_ptr = 0;
 
     state.dirty.panel_borders = true;
     state.dirty.menubar = true;
@@ -86,7 +95,7 @@ int main(void) {
 
             ui_set_cursor_pos(&state);
 
-            if (state.popup_active) state.popup_refresh_handler(&state);
+            if (state.popup.active) state.popup.refresh_handler(&state);
 
             doupdate();
         }
@@ -111,16 +120,41 @@ int main(void) {
             );
 #endif
 
-            if (state.popup_active) {
+            if (state.popup.active) {
                 switch (state.last_event) {
                     case KEY_ESC:
                         close_popup(&state);
                         break;
 
                     case KEY_ENTER:
-                        state.popup_confirm_handler(&state);
+                        if (state.popup.selected_button == Confirm)
+                            state.popup.confirm_handler(&state);
+                        else
+                            close_popup(&state);
+                        break;
+
+                    case KEY_LEFT:
+                    case KEY_RIGHT:
+                        if (state.popup.selected_button == Confirm) state.popup.selected_button = Cancel;
+                        else state.popup.selected_button = Confirm;
+                        break;
 
                     default:
+                        if (state.last_event == KEY_BACKSPACE && state.popup.has_textbox) {
+                            size_t len = strlen(state.popup.textbox_contents);
+                            if (len > 0)
+                                state.popup.textbox_contents[len - 1] = '\0';
+                            break;
+                        }
+                        if (state.popup.has_textbox && is_typable_char((char)state.last_event)) {
+                            size_t len = strlen(state.popup.textbox_contents);
+                            if (len < sizeof(state.popup.textbox_contents) - 1) {
+                                state.popup.textbox_contents[len] = (char)state.last_event;
+                                state.popup.textbox_contents[len + 1] = '\0';
+                            }
+                            break;
+                        }
+
                         valid = false;
                         break;
                 }
@@ -421,7 +455,6 @@ int main(void) {
                         }
 
                         state.in_menubar = false;
-                        state.current_menubar_option = 0;
                         state.dirty.menubar = true;
                     }
                     else if (is_typable_char((char)state.last_event)

@@ -146,7 +146,14 @@ int main(void) {
                                 state.popup.textbox_contents[len - 1] = '\0';
                             break;
                         }
-                        if (state.popup.has_textbox && is_typable_char((char)state.last_event)) {
+                        char c = (char)state.last_event;
+                        if (state.popup.has_textbox
+                            && strlen(state.popup.textbox_contents) < MAX_FILENAME_LEN
+                            && ((c >= '0' && c <= '9')
+                                || (c >= 'A' && c <= 'Z')
+                                || (c >= 'a' && c <= 'z')
+                                || c == '.' || c == '-' || c == '_'))
+                        {
                             size_t len = strlen(state.popup.textbox_contents);
                             if (len < sizeof(state.popup.textbox_contents) - 1) {
                                 state.popup.textbox_contents[len] = (char)state.last_event;

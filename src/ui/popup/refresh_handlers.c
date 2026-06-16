@@ -17,24 +17,35 @@ void draw_confirm_cancel_buttons(UIState* state, char* confirm_text) {
     const char* cancel_text = "CANCEL";
 
     const int center = POPUP_WIDTH / 2;
+    const int height = POPUP_HEIGHT - 3;
     const int confirm_button_x = center - POPUP_BUTTON_DISTANCE_FROM_CENTER - strlen(confirm_text);
     const int cancel_button_x = center + POPUP_BUTTON_DISTANCE_FROM_CENTER;
 
     if (state->popup.selected_button == Confirm)
         wattron(popup, COLOR_PAIR(HIGHLIGHT_COLOR_PAIR));
-    mvwprintw(popup, POPUP_HEIGHT - 3, confirm_button_x, "%s", confirm_text);
+    mvwprintw(popup, height, confirm_button_x, "%s", confirm_text);
     if (state->popup.selected_button == Confirm)
         wattroff(popup, COLOR_PAIR(HIGHLIGHT_COLOR_PAIR));
 
     if (state->popup.selected_button == Cancel)
         wattron(popup, COLOR_PAIR(HIGHLIGHT_COLOR_PAIR));
-    mvwprintw(popup, POPUP_HEIGHT - 3, cancel_button_x, "%s", cancel_text);
+    mvwprintw(popup, height, cancel_button_x, "%s", cancel_text);
     if (state->popup.selected_button == Cancel)
         wattroff(popup, COLOR_PAIR(HIGHLIGHT_COLOR_PAIR));
 }
 
 void draw_text_input_field(UIState* state) {
+    const int center = POPUP_WIDTH / 2;
+    const int height = POPUP_HEIGHT - 5;
 
+    const int x_start = center - POPUP_TEXT_INPUT_FIELD_WIDTH / 2;
+
+    wattron(popup, COLOR_PAIR(HIGHLIGHT_COLOR_PAIR));
+    for (int x = x_start; x < (POPUP_TEXT_INPUT_FIELD_WIDTH + x_start); ++x) {
+        mvwprintw(popup, height, x, " ");
+    }
+    mvwprintw(popup, height, x_start, "%s", state->popup.textbox_contents);
+    wattroff(popup, COLOR_PAIR(HIGHLIGHT_COLOR_PAIR));
 }
 
 void exit_popup_refresh_handler(UIState* state) {

@@ -94,14 +94,16 @@
 
 // Popup
 #define POPUP_WIDTH 60
-#define POPUP_HEIGHT 12
+#define POPUP_HEIGHT 10
 #define POPUP_X_POS (COLS / 2 - POPUP_WIDTH / 2)
 #define POPUP_Y_POS (LINES / 2 - POPUP_HEIGHT / 2)
 #define POPUP_BUTTON_DISTANCE_FROM_CENTER 2
+#define POPUP_TEXT_INPUT_FIELD_WIDTH 40
 
 // Other
 #define DEBUG_PC_HISTORY_SIZE 1000
 #define TAB_SIZE 4
+#define MAX_FILENAME_LEN 35
 
 
 // Globals
@@ -136,7 +138,7 @@ typedef struct UIState {
         bool active;
         PopupSelectedButton selected_button;
         bool has_textbox;
-        char textbox_contents[64];
+        char textbox_contents[MAX_FILENAME_LEN + 1];
         void (*refresh_handler)(struct UIState* state);
         void (*confirm_handler)(struct UIState* state);
     };

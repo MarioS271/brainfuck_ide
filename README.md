@@ -35,6 +35,11 @@ A TUI-based IDE for writing, running, and debugging **brainfuck** programs, buil
 
 The IDE is self-contained. It does not need any external libraries or whatsoever. To run it, simply open the executable file.
 
+### Special Program: `demo.bf`
+
+When a file named `demo.bf` exists, the IDE will automatically load it on start.
+The demo file is located [here](assets/demo.bf) and also included in all releases (`1.1.0` and later) 
+
 ---
 
 ## Brainfuck Primer

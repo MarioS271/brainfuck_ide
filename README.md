@@ -68,4 +68,7 @@ This project is licensed under the **GNU General Public License v3.0** (`GPL-3.0
 
 ---
 
-![The IDE](preview.png)
+## Gallery
+
+![The IDE](assets/preview_main.png)
+![The Save Dialog](assets/preview_popup.png)

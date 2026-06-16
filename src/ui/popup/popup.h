@@ -20,6 +20,7 @@
 
 
 // Functions
+void open_ask_for_input_popup(UIState* state);
 void open_save_popup(UIState* state);
 void open_load_popup(UIState* state);
 void open_exit_popup(UIState* state);

@@ -10,6 +10,7 @@
 
 #include "../ui.h"
 
+void ask_for_keypress_popup_refresh_handler(UIState* state);
 void exit_popup_refresh_handler(UIState* state);
 void save_popup_refresh_handler(UIState* state);
 void load_popup_refresh_handler(UIState* state);

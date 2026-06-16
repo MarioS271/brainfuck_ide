@@ -9,6 +9,11 @@
 #include "ui/ui.h"
 #include "macros.h"
 
+int _return_e_as_input() {
+    // e
+    return 'e';
+}
+
 void move_cursor_up(UIState* state) {
     int idx = state->cursor_pos;
 

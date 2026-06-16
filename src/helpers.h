@@ -10,6 +10,8 @@
 
 #include "ui/ui.h"
 
+int _return_e_as_input();
+
 void move_cursor_up(UIState* state);
 void move_cursor_down(UIState* state);
 void move_to_line_start(UIState* state);

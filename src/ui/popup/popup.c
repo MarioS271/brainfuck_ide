@@ -55,15 +55,26 @@ void create_popup_base() {
 
 void popup_init(UIState* state) {
     state->popup.active = true;
-    state->popup.selected_button = Confirm;
 
     create_popup_base();
     state->popup.refresh_handler(state);
 }
 
+void open_ask_for_input_popup(UIState* state) {
+    state->popup.has_buttons = false;
+    state->popup.has_textbox = false;
+    state->popup.asking_for_keypress = true;
+    state->popup.refresh_handler = ask_for_keypress_popup_refresh_handler;
+
+    popup_init(state);
+}
+
 void open_save_popup(UIState* state) {
+    state->popup.has_buttons = true;
+    state->popup.selected_button = Confirm;
     state->popup.has_textbox = true;
     memset(state->popup.textbox_contents, 0, sizeof(state->popup.textbox_contents));
+    state->popup.asking_for_keypress = false;
     state->popup.refresh_handler = save_popup_refresh_handler;
     state->popup.confirm_handler = save_popup_confirm_handler;
 
@@ -71,8 +82,11 @@ void open_save_popup(UIState* state) {
 }
 
 void open_load_popup(UIState* state) {
+    state->popup.has_buttons = true;
+    state->popup.selected_button = Confirm;
     state->popup.has_textbox = true;
     memset(state->popup.textbox_contents, 0, sizeof(state->popup.textbox_contents));
+    state->popup.asking_for_keypress = false;
     state->popup.refresh_handler = load_popup_refresh_handler;
     state->popup.confirm_handler = load_popup_confirm_handler;
 
@@ -80,7 +94,10 @@ void open_load_popup(UIState* state) {
 }
 
 void open_exit_popup(UIState* state) {
+    state->popup.has_buttons = true;
+    state->popup.selected_button = Confirm;
     state->popup.has_textbox = false;
+    state->popup.asking_for_keypress = false;
     state->popup.refresh_handler = exit_popup_refresh_handler;
     state->popup.confirm_handler = exit_popup_confirm_handler;
 

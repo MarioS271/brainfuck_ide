@@ -136,9 +136,12 @@ typedef struct UIState {
 
     struct _Popup {
         bool active;
+        bool has_buttons;
         PopupSelectedButton selected_button;
         bool has_textbox;
         char textbox_contents[MAX_FILENAME_LEN + 1];
+        bool asking_for_keypress;
+        int keypress;
         void (*refresh_handler)(struct UIState* state);
         void (*confirm_handler)(struct UIState* state);
     };

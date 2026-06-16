@@ -19,8 +19,41 @@
 
 #include "macros.h"
 
-int _return_E() {
-    return 'e';
+int ask_for_keypress_popup(UIState* state) {
+    open_ask_for_input_popup(state);
+    doupdate();
+
+    bool valid = false;
+    while (!valid) {
+        valid = true;
+        int input = getch();
+        switch (input) {
+            case KEY_ESC:
+                state->popup.keypress = ASCII_NUL;
+                break;
+
+            default:
+                if (is_typable_char((char)input) && input != KEY_TAB) {
+                    state->popup.keypress = (unsigned char)input;
+                    break;
+                }
+
+                valid = false;
+                break;
+        }
+    }
+
+    close_popup(state);
+
+    if (state->dirty.panel_borders) draw_panel_borders(state);
+    if (state->dirty.menubar) draw_menubar(state);
+    if (state->dirty.editor) draw_editor_panel(state);
+    if (state->dirty.tape) draw_tape_panel(state);
+    if (state->dirty.output) draw_output_panel(state);
+
+    doupdate();
+
+    return state->popup.keypress;
 }
 
 int main(void) {
@@ -47,9 +80,7 @@ int main(void) {
     state.popup.confirm_handler = nullptr;
 
     state.editor_buffer = malloc(EDITOR_BUFFER_SIZE);
-    char prog[] = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.";
-    strcpy(state.editor_buffer, prog);
-    state.editor_buffer_len = strlen(prog);
+    state.editor_buffer_len = 0;
 
     state.output_buffer = malloc(OUTPUT_BUFFER_SIZE);
     state.output_buffer_len = 0;
@@ -76,6 +107,14 @@ int main(void) {
     if (state.output_buffer == nullptr) {
         printf("Error: malloc returned nullptr for allocating output buffer, aborting");
         goto exit_failure;
+    }
+
+    FILE* fp = fopen("demo.bf", "r");
+    if (fp != nullptr) {
+        const size_t bytes_read = fread(state.editor_buffer, 1, EDITOR_BUFFER_SIZE - 1, fp);
+        state.editor_buffer[bytes_read] = '\0';
+        state.editor_buffer_len = bytes_read;
+        fclose(fp);
     }
 
     while (true) {
@@ -127,14 +166,17 @@ int main(void) {
                         break;
 
                     case KEY_ENTER:
-                        if (state.popup.selected_button == Confirm)
-                            state.popup.confirm_handler(&state);
-                        else
-                            close_popup(&state);
+                        if (state.popup.has_buttons) {
+                            if (state.popup.selected_button == Confirm)
+                                state.popup.confirm_handler(&state);
+                            else
+                                close_popup(&state);
+                        }
                         break;
 
                     case KEY_LEFT:
                     case KEY_RIGHT:
+                        if (!state.popup.has_buttons) break;
                         if (state.popup.selected_button == Confirm) state.popup.selected_button = Cancel;
                         else state.popup.selected_button = Confirm;
                         break;
@@ -254,7 +296,7 @@ int main(void) {
                                     }
                                     break;
                                 case INPUT_BYTE:
-                                    state.debug_tape[state.debug_data_ptr] = (uint8_t)_return_E();
+                                    state.debug_tape[state.debug_data_ptr] = (uint8_t)_return_e_as_input();
                                     break;
                                 default:
                                     break;
@@ -319,7 +361,7 @@ int main(void) {
                                 }
                                 break;
                             case INPUT_BYTE:
-                                state.debug_tape[state.debug_data_ptr] = (uint8_t)_return_E();
+                                state.debug_tape[state.debug_data_ptr] = (uint8_t)_return_e_as_input();
                                 break;
                             case LOOP_BEGIN:
                                 if (state.debug_tape[state.debug_data_ptr] == 0) {
@@ -415,7 +457,7 @@ int main(void) {
                                     &state,
                                     state.editor_buffer,
                                     state.editor_buffer_len,
-                                    _return_E
+                                    ask_for_keypress_popup
                                 );
                                 state.mode = Normal;
                                 state.dirty.panel_borders = true;

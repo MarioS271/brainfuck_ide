@@ -10,11 +10,7 @@
 
 #include <stdlib.h>
 #include "../interpreter/interpreter.h"
-
-int _return_e_as_input() {
-    // e
-    return 'e';
-}
+#include "../helpers.h"
 
 bool is_displayable_char(char c) {
     if (

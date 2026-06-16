@@ -48,6 +48,13 @@ void draw_text_input_field(UIState* state) {
     wattroff(popup, COLOR_PAIR(HIGHLIGHT_COLOR_PAIR));
 }
 
+void ask_for_keypress_popup_refresh_handler(UIState* state) {
+    print_centered(3, "Brainfuck program has requested input");
+    print_centered(4, "Please press a key");
+
+    wnoutrefresh(popup);
+}
+
 void exit_popup_refresh_handler(UIState* state) {
     print_centered(2, "Do you want to exit?");
     print_centered(3, "All unsaved changes will be lost!");

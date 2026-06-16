@@ -24,7 +24,7 @@ void run_brainfuck(
     UIState* state,
     const char* prog,
     size_t prog_len,
-    int (*read_input)(void)
+    int (*read_input)(UIState* state)
 );
 
 void generate_tape(

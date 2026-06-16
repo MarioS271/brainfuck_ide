@@ -61,7 +61,7 @@ void run_brainfuck(
     UIState* state,
     const char* const prog,
     const size_t prog_len,
-    int (*read_input)(void))
+    int (*read_input)(UIState* state))
 {
     uint8_t tape[TAPE_LEN] = {};
     unsigned int data_ptr = 0;
@@ -102,7 +102,7 @@ void run_brainfuck(
             }
 
             case INPUT_BYTE: {
-                tape[data_ptr] = read_input();
+                tape[data_ptr] = read_input(state);
                 break;
             }
 

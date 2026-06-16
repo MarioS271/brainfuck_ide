@@ -19,6 +19,8 @@
 
 #include "macros.h"
 
+// TODO: fix debugger stopping after 10k steps (and for some reason right now at pc 199?)
+
 int ask_for_keypress_popup(UIState* state) {
     open_ask_for_input_popup(state);
     doupdate();

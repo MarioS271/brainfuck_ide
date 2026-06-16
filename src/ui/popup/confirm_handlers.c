@@ -8,6 +8,7 @@
 
 #include "popup.h"
 #include <stdlib.h>
+#include <string.h>
 
 void exit_popup_confirm_handler(UIState* state) {
     shutdown_ui();
@@ -20,9 +21,24 @@ void exit_popup_confirm_handler(UIState* state) {
 }
 
 void save_popup_confirm_handler(UIState* state) {
+    FILE* fp = fopen(state->popup.textbox_contents, "w");
+    fprintf(fp, "%s", state->editor_buffer);
+    fclose(fp);
 
+    close_popup(state);
 }
 
 void load_popup_confirm_handler(UIState* state) {
+    FILE* fp = fopen(state->popup.textbox_contents, "r");
+    if (fp == nullptr) {
+        fp = fopen(state->popup.textbox_contents, "w");
+        fclose(fp);
+        fp = fopen(state->popup.textbox_contents, "r");
+    }
+    const size_t bytes_read = fread(state->editor_buffer, 1, EDITOR_BUFFER_SIZE - 1, fp);
+    state->editor_buffer[bytes_read] = '\0';
+    state->editor_buffer_len = bytes_read;
+    fclose(fp);
 
+    close_popup(state);
 }

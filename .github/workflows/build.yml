@@ -39,5 +39,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: build/brainfuck_ide.exe
+          files: |
+            build/brainfuck_ide.exe
+            assets/demo.bf
           generate_release_notes: true

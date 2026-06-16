@@ -92,16 +92,22 @@
 #define TAPE_DRAWABLE_WIDTH (TAPE_PANEL_WIDTH - (TAPE_PADDING_X * 2))
 #define TAPE_MAX_VISIBLE_CELLS ((TAPE_DRAWABLE_WIDTH + TAPE_CELL_SPACING) / (TAPE_CELL_WIDTH + TAPE_CELL_SPACING))
 
+// Popup
+#define POPUP_WIDTH 60
+#define POPUP_HEIGHT 15
+#define POPUP_X_POS (COLS / 2 - POPUP_WIDTH / 2)
+#define POPUP_Y_POS (LINES / 2 - POPUP_HEIGHT / 2)
+
 // Other
 #define DEBUG_PC_HISTORY_SIZE 1000
 #define TAB_SIZE 4
 
 
 // Globals
+extern WINDOW* popup;
 extern WINDOW* editor_panel;
 extern WINDOW* output_panel;
 extern WINDOW* tape_panel;
-extern WINDOW* popup;
 extern int editor_cursor_x;
 extern int editor_cursor_y;
 extern int editor_scroll;
@@ -115,11 +121,16 @@ typedef enum {
 
 
 // Structs
-typedef struct {
+typedef struct UIState {
     int last_event;
 
     UIMode mode;
     bool in_menubar;
+
+    bool popup_active;
+    bool popup_has_textbox;
+    void (*popup_refresh_handler)(struct UIState* state);
+    void (*popup_confirm_handler)(struct UIState* state);
 
     char* editor_buffer;
     size_t editor_buffer_len;

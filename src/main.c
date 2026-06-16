@@ -14,6 +14,7 @@
 
 #include "helpers.h"
 #include "ui/ui.h"
+#include "ui/popup/popup.h"
 #include "interpreter/interpreter.h"
 
 #include "macros.h"
@@ -85,6 +86,8 @@ int main(void) {
 
             ui_set_cursor_pos(&state);
 
+            if (state.popup_active) state.popup_refresh_handler(&state);
+
             doupdate();
         }
 
@@ -107,6 +110,22 @@ int main(void) {
                 (int)state.last_event
             );
 #endif
+
+            if (state.popup_active) {
+                switch (state.last_event) {
+                    case KEY_ESC:
+                        close_popup(&state);
+                        break;
+
+                    case KEY_ENTER:
+                        state.popup_confirm_handler(&state);
+
+                    default:
+                        valid = false;
+                        break;
+                }
+                continue;
+            }
 
             switch (state.last_event) {
                 case KEY_ESC:
@@ -196,28 +215,6 @@ int main(void) {
                                 case INPUT_BYTE:
                                     state.debug_tape[state.debug_data_ptr] = (uint8_t)_return_E();
                                     break;
-                                // case LOOP_BEGIN:
-                                //     if (state.debug_tape[state.debug_data_ptr] == 0) {
-                                //         int depth = 1, j = state.cursor_pos;
-                                //         while (depth != 0 && j < (int)state.editor_buffer_len - 1) {
-                                //             ++j;
-                                //             if (state.editor_buffer[j] == LOOP_BEGIN) ++depth;
-                                //             if (state.editor_buffer[j] == LOOP_END)   --depth;
-                                //         }
-                                //         new_cursor_pos = j + 1;
-                                //     }
-                                //     break;
-                                // case LOOP_END:
-                                //     if (state.debug_tape[state.debug_data_ptr] != 0) {
-                                //         int depth = 1, j = state.cursor_pos;
-                                //         while (depth != 0 && j > 0) {
-                                //             --j;
-                                //             if (state.editor_buffer[j] == LOOP_END)   ++depth;
-                                //             if (state.editor_buffer[j] == LOOP_BEGIN) --depth;
-                                //         }
-                                //         new_cursor_pos = j + 1;
-                                //     }
-                                //     break;
                                 default:
                                     break;
                             }
@@ -409,13 +406,15 @@ int main(void) {
                                 break;
 
                             case 2:
+                                open_save_popup(&state);
                                 break;
 
                             case 3:
+                                open_load_popup(&state);
                                 break;
 
                             case 4:
-                                goto exit_success;
+                                open_exit_popup(&state);
 
                             default:
                                 break;

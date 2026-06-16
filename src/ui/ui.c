@@ -11,6 +11,7 @@
 #include <string.h>
 #include <PDCurses/curses.h>
 
+WINDOW* popup;
 WINDOW* editor_panel;
 WINDOW* output_panel;
 WINDOW* tape_panel;
@@ -34,6 +35,7 @@ void init_ui() {
     init_pair(IN_OP_COLOR_PAIR, COLOR_RED, COLOR_BLACK);
     init_pair(LOOP_OP_COLOR_PAIR, COLOR_CYAN, COLOR_BLACK);
 
+    popup = newwin(POPUP_HEIGHT, POPUP_WIDTH, POPUP_Y_POS, POPUP_X_POS);
     editor_panel = newwin(EDITOR_PANEL_HEIGHT, EDITOR_PANEL_WIDTH, EDITOR_PANEL_Y, EDITOR_PANEL_X);
     output_panel = newwin(OUTPUT_PANEL_HEIGHT, OUTPUT_PANEL_WIDTH, OUTPUT_PANEL_Y, OUTPUT_PANEL_X);
     tape_panel = newwin(TAPE_PANEL_HEIGHT, TAPE_PANEL_WIDTH, TAPE_PANEL_Y, TAPE_PANEL_X);

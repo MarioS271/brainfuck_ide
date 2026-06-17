@@ -101,7 +101,7 @@
 #define POPUP_TEXT_INPUT_FIELD_WIDTH 40
 
 // Other
-#define DEBUG_PC_HISTORY_SIZE 10000
+#define DEBUG_JUMP_HISTORY_SIZE 10000
 #define TAB_SIZE 4
 #define MAX_FILENAME_LEN 35
 
@@ -128,6 +128,10 @@ typedef enum {
 
 
 // Structs
+typedef struct {
+    int src;
+    int dst;
+} DebugJumpRecord;
 typedef struct UIState {
     int last_event;
 
@@ -156,11 +160,14 @@ typedef struct UIState {
     int cursor_pos;
     int current_menubar_option;
 
-    int debug_pc_history[DEBUG_PC_HISTORY_SIZE];
-    size_t debug_pc_index;
+    struct _Debug {
+        DebugJumpRecord jump_history[DEBUG_JUMP_HISTORY_SIZE];
+        int jump_head;
+        int jump_count;
 
-    uint8_t debug_tape[TAPE_LEN];
-    unsigned int debug_data_ptr;
+        uint8_t tape[TAPE_LEN];
+        unsigned int data_ptr;
+    } debug;
 
     struct _Dirty {
         bool panel_borders;
@@ -168,8 +175,7 @@ typedef struct UIState {
         bool editor;
         bool output;
         bool tape;
-    };
-    struct _Dirty dirty;
+    } dirty;
 } UIState;
 
 

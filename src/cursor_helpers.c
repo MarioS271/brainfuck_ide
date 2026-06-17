@@ -1,18 +1,12 @@
 /**
- * @file helpers.c
+ * @file cursor_helpers.c
  * @authors MarioS271
  * 
  * SPDX-FileCopyrightText: (C) MarioS271 2026
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#include "ui/ui.h"
-#include "macros.h"
-
-int _return_e_as_input() {
-    // e
-    return 'e';
-}
+#include "helpers.h"
 
 void move_cursor_up(UIState* state) {
     int idx = state->cursor_pos;
@@ -78,12 +72,4 @@ void move_to_line_end(UIState* state) {
     state->cursor_pos = line_end;
     state->dirty.editor = true;
     state->dirty.tape = true;
-}
-
-
-bool is_typable_char(char c) {
-    if ((c >= ' ' && c <= 'z') || c == KEY_ENTER || c == KEY_TAB)
-        return true;
-
-    return false;
 }

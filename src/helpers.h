@@ -18,3 +18,10 @@ void move_to_line_start(UIState* state);
 void move_to_line_end(UIState* state);
 
 bool is_typable_char(char c);
+
+void regenerate_debug_tape(UIState* state);
+
+int debug_loop_begin_find_dst(UIState* state);
+int debug_loop_end_find_dst(UIState* state);
+
+void clear_debug_jump_history(UIState* state);

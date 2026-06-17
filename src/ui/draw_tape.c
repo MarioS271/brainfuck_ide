@@ -32,8 +32,8 @@ void draw_tape_panel(UIState* state) {
     unsigned int data_ptr = 0;
 
     if (state->mode == Debug) {
-        memcpy(tape, state->debug_tape, TAPE_LEN);
-        data_ptr = state->debug_data_ptr;
+        memcpy(tape, state->debug.tape, TAPE_LEN);
+        data_ptr = state->debug.data_ptr;
     } else {
         // yes, i know recomputing the ENTIRE tape EVERY edit and cursor move is stupid af
         // BUUUT im to lazy to do it properly :)

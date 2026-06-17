@@ -19,6 +19,7 @@ void move_to_line_end(UIState* state);
 
 bool is_typable_char(char c);
 
+void replay_debug_trace(UIState* state);
 void regenerate_debug_tape(UIState* state);
 
 int debug_loop_begin_find_dst(UIState* state);

@@ -256,29 +256,37 @@ int main(void) {
 
                         if (state.current_menubar_option < 0)
                             state.current_menubar_option = MENUBAR_NUM_ITEMS - 1;
+
                         break;
                     }
 
                     if (state.cursor_pos > 0) {
-                        int jump_history_top_index =
-                            state.debug.jump_head == 0 ? DEBUG_JUMP_HISTORY_SIZE - 1 : state.debug.jump_head - 1;
-
-                        if (state.mode == Debug
-                            && state.debug.jump_count > 0
-                            && state.debug.jump_history[jump_history_top_index].dst == state.cursor_pos)
-                        {
-                            state.cursor_pos = state.debug.jump_history[jump_history_top_index].src;
-                        }
-
-                        regenerate_debug_tape(&state);
                         state.dirty.editor = true;
                         state.dirty.tape = true;
+
+                        if (state.mode == Debug && state.debug.jump_count > 0) {
+                            int top = (state.debug.jump_head - 1 + DEBUG_JUMP_HISTORY_SIZE) % DEBUG_JUMP_HISTORY_SIZE;
+
+                            if (state.debug.jump_history[top].dst == state.cursor_pos) {
+                                state.cursor_pos = state.debug.jump_history[top].src;
+                                state.debug.jump_head = top;
+                                --state.debug.jump_count;
+
+                                regenerate_debug_tape(&state);
+                                break;
+                            }
+                        }
+
                         --state.cursor_pos;
+                        if (state.mode == Debug)
+                            regenerate_debug_tape(&state);
+
                         break;
                     }
 
                     valid = false;
                     break;
+
                 case KEY_RIGHT:
                     if (state.in_menubar) {
                         ++state.current_menubar_option;
@@ -296,29 +304,27 @@ int main(void) {
                         ++state.cursor_pos;
 
                         if (state.mode == Debug) {
-                            switch (state.editor_buffer[state.cursor_pos]) {
-                                case '[':
-                                    if (state.debug.tape[state.debug.data_ptr] != 0) goto no_debug_jumps;
-                                    state.debug.jump_history[state.debug.jump_head].src = state.cursor_pos;
-                                    state.debug.jump_history[state.debug.jump_head].dst = debug_loop_begin_find_dst(&state);
-                                    break;
-
-                                case ']':
-                                    if (state.debug.tape[state.debug.data_ptr] == 0) goto no_debug_jumps;
-                                    state.debug.jump_history[state.debug.jump_head].src = state.cursor_pos;
-                                    state.debug.jump_history[state.debug.jump_head].dst = debug_loop_end_find_dst(&state);
-                                    break;
-
-                                default: goto no_debug_jumps;
-                            }
-
-                            state.cursor_pos = state.debug.jump_history[state.debug.jump_head].dst;
-                            ++state.debug.jump_head;
-                            if (state.debug.jump_count < DEBUG_JUMP_HISTORY_SIZE) ++state.debug.jump_count;
-                            if (state.debug.jump_head > DEBUG_JUMP_HISTORY_SIZE)
-                                state.debug.jump_head = 0;
-no_debug_jumps:
                             regenerate_debug_tape(&state);
+
+                            char c = state.editor_buffer[state.cursor_pos];
+                            int dst = -1;
+
+                            if (c == '[' && state.debug.tape[state.debug.data_ptr] == 0)
+                                dst = debug_loop_begin_find_dst(&state);
+                            else if (c == ']' && state.debug.tape[state.debug.data_ptr] != 0)
+                                dst = debug_loop_end_find_dst(&state);
+
+                            if (dst >= 0) {
+                                state.debug.jump_history[state.debug.jump_head].src = state.cursor_pos;
+                                state.debug.jump_history[state.debug.jump_head].dst = dst;
+                                state.debug.jump_head = (state.debug.jump_head + 1) % DEBUG_JUMP_HISTORY_SIZE;
+
+                                if (state.debug.jump_count < DEBUG_JUMP_HISTORY_SIZE)
+                                    ++state.debug.jump_count;
+
+                                state.cursor_pos = dst;
+                                regenerate_debug_tape(&state);
+                            }
                         }
                         break;
                     }

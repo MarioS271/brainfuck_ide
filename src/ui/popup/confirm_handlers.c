@@ -21,9 +21,12 @@ void exit_popup_confirm_handler(UIState* state) {
 }
 
 void save_popup_confirm_handler(UIState* state) {
-    FILE* fp = fopen(state->popup.textbox_contents, "w");
-    fprintf(fp, "%s", state->editor_buffer);
-    fclose(fp);
+    remove(state->popup.textbox_contents);
+    FILE* fp = fopen(state->popup.textbox_contents, "wb");
+    if (fp != nullptr) {
+        fwrite(state->editor_buffer, 1, state->editor_buffer_len, fp);
+        fclose(fp);
+    }
 
     close_popup(state);
 }

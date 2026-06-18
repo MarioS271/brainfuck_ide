@@ -20,6 +20,13 @@ A TUI-based IDE for writing, running, and debugging **brainfuck** programs, buil
 
 ---
 
+## AI Usage Disclaimer
+
+I used AI for writing the github workflow, a part of the README youre reading right now and for debugging when stuff was broken a lot :(
+I sometimes also used AI for working through the concepts like the popup system in order to have a good architecture in my head before I start writing funny code
+
+---
+
 ## Supported Platforms
 | OS      | Supported? |
 |---------|------------|

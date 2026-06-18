@@ -61,6 +61,8 @@ void ask_for_debug_start_pos_popup_refresh_handler(UIState* state) {
 
     draw_text_input_field(state);
 
+    print_centered(7, "Press ENTER to confirm");
+
     wnoutrefresh(popup);
 }
 

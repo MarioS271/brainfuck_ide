@@ -28,6 +28,19 @@ int ask_for_keypress_popup(UIState* state) {
         valid = true;
 
         int input = getch();
+        if (input == KEY_RESIZE) {
+            resize_ui();
+            clear();
+            draw_panel_borders(state);
+            draw_menubar(state);
+            draw_editor_panel(state);
+            draw_tape_panel(state);
+            draw_output_panel(state);
+            state->popup.refresh_handler(state);
+            valid = false;
+            continue;
+        }
+
         if (is_typable_char((char)input) && input != KEY_TAB) {
             state->popup.keypress = (unsigned char)input;
             break;
@@ -58,6 +71,17 @@ int ask_for_debug_start_pos_popup(UIState* state) {
         end = true;
 
         const int input = getch();
+        if (input == KEY_RESIZE) {
+            resize_ui();
+            clear();
+            draw_panel_borders(state);
+            draw_menubar(state);
+            draw_editor_panel(state);
+            draw_tape_panel(state);
+            draw_output_panel(state);
+            state->popup.refresh_handler(state);
+        }
+
         if (input >= '0' && input <= '9') {
             const size_t len = strlen(state->popup.textbox_contents);
             if (len < sizeof(state->popup.textbox_contents) - 1) {
@@ -198,6 +222,16 @@ int main(void) {
 
             if (state.popup.active) {
                 switch (state.last_event) {
+                    case KEY_RESIZE:
+                        resize_ui();
+                        clear();
+                        state.dirty.panel_borders = true;
+                        state.dirty.menubar = true;
+                        state.dirty.editor = true;
+                        state.dirty.output = true;
+                        state.dirty.tape = true;
+                        break;
+
                     case KEY_ESC:
                         close_popup(&state);
                         break;
@@ -424,8 +458,6 @@ int main(void) {
 
                             case 1:
                                 if (state.mode == Normal) {
-                                    state.mode = Debug;
-
                                     int row = ask_for_debug_start_pos_popup(&state);
                                     int target_pos = 0;
                                     int steps = find_step_count_for_row(&state, row, &target_pos);
@@ -438,6 +470,8 @@ int main(void) {
 
                                     state.cursor_pos = target_pos;
                                     state.debug.pc   = target_pos;
+
+                                    state.mode = Debug;
                                 }
                                 else {
                                     state.mode = Normal;

@@ -20,6 +20,7 @@
 
 
 // Functions
+void create_popup_base();
 void open_ask_for_debug_start_pos_popup(UIState* state);
 void open_ask_for_input_popup(UIState* state);
 void open_save_popup(UIState* state);

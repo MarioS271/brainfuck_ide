@@ -52,7 +52,7 @@ void shutdown_ui() {
 void ui_set_cursor_pos(UIState* state) {
     move(EDITOR_PANEL_Y + editor_cursor_y, EDITOR_PANEL_X + editor_cursor_x);
 
-    if (!state->in_menubar)
+    if (!state->in_menubar && !state->popup.active)
         curs_set(2);
     else
         curs_set(0);
@@ -62,6 +62,9 @@ void ui_set_cursor_pos(UIState* state) {
 
 void resize_ui() {
     resize_term(0, 0);
+
+    wresize(popup, POPUP_HEIGHT, POPUP_WIDTH);
+    mvwin(popup, POPUP_Y_POS, POPUP_X_POS);
 
     wresize(editor_panel, EDITOR_PANEL_HEIGHT, EDITOR_PANEL_WIDTH);
     mvwin(editor_panel, EDITOR_PANEL_Y, EDITOR_PANEL_X);

@@ -49,6 +49,8 @@ void draw_text_input_field(UIState* state) {
 }
 
 void ask_for_keypress_popup_refresh_handler(UIState* state) {
+    create_popup_base();
+
     print_centered(3, "Brainfuck program has requested input");
     print_centered(4, "Please press a key");
 
@@ -56,6 +58,8 @@ void ask_for_keypress_popup_refresh_handler(UIState* state) {
 }
 
 void ask_for_debug_start_pos_popup_refresh_handler(UIState* state) {
+    create_popup_base();
+
     print_centered(2, "Please enter row number for");
     print_centered(3, "debugger to start in");
 
@@ -67,6 +71,8 @@ void ask_for_debug_start_pos_popup_refresh_handler(UIState* state) {
 }
 
 void exit_popup_refresh_handler(UIState* state) {
+    create_popup_base();
+
     print_centered(2, "Do you want to exit?");
     print_centered(3, "All unsaved changes will be lost!");
 
@@ -76,6 +82,8 @@ void exit_popup_refresh_handler(UIState* state) {
 }
 
 void save_popup_refresh_handler(UIState* state) {
+    create_popup_base();
+
     print_centered(2, "Please enter a name for the file to save");
 
     draw_text_input_field(state);
@@ -85,6 +93,8 @@ void save_popup_refresh_handler(UIState* state) {
 }
 
 void load_popup_refresh_handler(UIState* state) {
+    create_popup_base();
+
     print_centered(2, "Please enter a name for the file to save");
     print_centered(3, "All unsaved changes will be lost!");
 

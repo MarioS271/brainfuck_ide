@@ -265,11 +265,8 @@ int main(void) {
 
 
                 case KEY_HOME:
-                    if (state.mode == Debug) {
-                        // clear_debug_jump_history(&state);
-                        // regenerate_debug_tape(&state);
+                    if (state.mode == Debug)
                         break;
-                    }
                     if (state.in_menubar) {
                         valid = false;
                         break;
@@ -277,11 +274,8 @@ int main(void) {
                     move_to_line_start(&state);
                     break;
                 case KEY_END:
-                    if (state.mode == Debug) {
-                        // clear_debug_jump_history(&state);
-                        // regenerate_debug_tape(&state);
+                    if (state.mode == Debug)
                         break;
-                    }
                     if (state.in_menubar) {
                         valid = false;
                         break;
@@ -310,6 +304,13 @@ int main(void) {
                         } else {
                             valid = false;
                         }
+                        break;
+                    }
+
+                    if (state.cursor_pos < state.editor_buffer_len) {
+                        --state.cursor_pos;
+                        state.dirty.editor = true;
+                        state.dirty.tape = true;
                         break;
                     }
 

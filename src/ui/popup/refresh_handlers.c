@@ -55,6 +55,15 @@ void ask_for_keypress_popup_refresh_handler(UIState* state) {
     wnoutrefresh(popup);
 }
 
+void ask_for_debug_start_pos_popup_refresh_handler(UIState* state) {
+    print_centered(2, "Please enter row number for");
+    print_centered(3, "debugger to start in");
+
+    draw_text_input_field(state);
+
+    wnoutrefresh(popup);
+}
+
 void exit_popup_refresh_handler(UIState* state) {
     print_centered(2, "Do you want to exit?");
     print_centered(3, "All unsaved changes will be lost!");

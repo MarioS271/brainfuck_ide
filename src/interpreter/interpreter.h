@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include "../ui/ui.h"
+#include "../helpers.h"
 
 #define INCREMENT_PTR '>'
 #define DECREMENT_PTR '<'
@@ -27,10 +28,22 @@ void run_brainfuck(
     int (*read_input)(UIState* state)
 );
 
-void generate_tape(
+void generate_tape_to_cursor_pos(
     uint8_t tape[],
     unsigned int* data_ptr,
     UIState* state,
-    int (*read_input)(void),
+    int (*read_input)(),
     bool write_output
 );
+
+void generate_tape_to_instruction_count(
+    uint8_t tape[],
+    unsigned int* data_ptr,
+    UIState* state,
+    int (*read_input)(),
+    bool write_output,
+    int step_limit,
+    int* out_cursor_pos
+);
+
+int find_step_count_for_row(UIState* state, int row, int* out_target_pos);

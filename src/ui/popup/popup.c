@@ -63,8 +63,17 @@ void popup_init(UIState* state) {
 void open_ask_for_input_popup(UIState* state) {
     state->popup.has_buttons = false;
     state->popup.has_textbox = false;
-    state->popup.asking_for_keypress = true;
     state->popup.refresh_handler = ask_for_keypress_popup_refresh_handler;
+
+    popup_init(state);
+}
+
+void open_ask_for_debug_start_pos_popup(UIState* state) {
+    state->popup.has_buttons = false;
+    state->popup.has_textbox = true;
+    state->popup.number_textbox = true;
+    memset(state->popup.textbox_contents, 0, sizeof(state->popup.textbox_contents));
+    state->popup.refresh_handler = ask_for_debug_start_pos_popup_refresh_handler;
 
     popup_init(state);
 }
@@ -73,8 +82,8 @@ void open_save_popup(UIState* state) {
     state->popup.has_buttons = true;
     state->popup.selected_button = Confirm;
     state->popup.has_textbox = true;
+    state->popup.number_textbox = false;
     memset(state->popup.textbox_contents, 0, sizeof(state->popup.textbox_contents));
-    state->popup.asking_for_keypress = false;
     state->popup.refresh_handler = save_popup_refresh_handler;
     state->popup.confirm_handler = save_popup_confirm_handler;
 
@@ -85,8 +94,8 @@ void open_load_popup(UIState* state) {
     state->popup.has_buttons = true;
     state->popup.selected_button = Confirm;
     state->popup.has_textbox = true;
+    state->popup.number_textbox = false;
     memset(state->popup.textbox_contents, 0, sizeof(state->popup.textbox_contents));
-    state->popup.asking_for_keypress = false;
     state->popup.refresh_handler = load_popup_refresh_handler;
     state->popup.confirm_handler = load_popup_confirm_handler;
 
@@ -97,7 +106,7 @@ void open_exit_popup(UIState* state) {
     state->popup.has_buttons = true;
     state->popup.selected_button = Confirm;
     state->popup.has_textbox = false;
-    state->popup.asking_for_keypress = false;
+    state->popup.number_textbox = false;
     state->popup.refresh_handler = exit_popup_refresh_handler;
     state->popup.confirm_handler = exit_popup_confirm_handler;
 

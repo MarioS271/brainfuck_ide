@@ -38,7 +38,7 @@ void draw_tape_panel(UIState* state) {
         // yes, i know recomputing the ENTIRE tape EVERY edit and cursor move is stupid af
         // BUUUT im to lazy to do it properly :)
         // (and everything else in this app is also unoptimized asf so what)
-        generate_tape(tape, &data_ptr, state, _return_e_as_input, false);
+        generate_tape_to_cursor_pos(tape, &data_ptr, state, _return_e_as_input, false);
     }
 
     werase(tape_panel);

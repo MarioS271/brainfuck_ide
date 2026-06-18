@@ -101,7 +101,6 @@
 #define POPUP_TEXT_INPUT_FIELD_WIDTH 40
 
 // Other
-#define DEBUG_JUMP_HISTORY_SIZE 10000
 #define TAB_SIZE 4
 #define MAX_FILENAME_LEN 35
 
@@ -143,8 +142,8 @@ typedef struct UIState {
         bool has_buttons;
         PopupSelectedButton selected_button;
         bool has_textbox;
+        bool number_textbox;
         char textbox_contents[MAX_FILENAME_LEN + 1];
-        bool asking_for_keypress;
         int keypress;
         void (*refresh_handler)(struct UIState* state);
         void (*confirm_handler)(struct UIState* state);
@@ -161,12 +160,11 @@ typedef struct UIState {
     int current_menubar_option;
 
     struct _Debug {
-        DebugJumpRecord jump_history[DEBUG_JUMP_HISTORY_SIZE];
-        int jump_head;
-        int jump_count;
-
+        int step_count;
         uint8_t tape[TAPE_LEN];
         unsigned int data_ptr;
+        int pc;
+        bool halted;
     } debug;
 
     struct _Dirty {

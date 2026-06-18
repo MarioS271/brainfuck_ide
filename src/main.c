@@ -26,21 +26,14 @@ int ask_for_keypress_popup(UIState* state) {
     bool valid = false;
     while (!valid) {
         valid = true;
+
         int input = getch();
-        switch (input) {
-            case KEY_ESC:
-                state->popup.keypress = ASCII_NUL;
-                break;
-
-            default:
-                if (is_typable_char((char)input) && input != KEY_TAB) {
-                    state->popup.keypress = (unsigned char)input;
-                    break;
-                }
-
-                valid = false;
-                break;
+        if (is_typable_char((char)input) && input != KEY_TAB) {
+            state->popup.keypress = (unsigned char)input;
+            break;
         }
+
+        valid = false;
     }
 
     close_popup(state);
@@ -54,6 +47,53 @@ int ask_for_keypress_popup(UIState* state) {
     doupdate();
 
     return state->popup.keypress;
+}
+
+int ask_for_debug_start_pos_popup(UIState* state) {
+    open_ask_for_debug_start_pos_popup(state);
+    doupdate();
+
+    bool end = false;
+    while (!end) {
+        end = true;
+
+        const int input = getch();
+        if (input >= '0' && input <= '9') {
+            const size_t len = strlen(state->popup.textbox_contents);
+            if (len < sizeof(state->popup.textbox_contents) - 1) {
+                state->popup.textbox_contents[len] = (char)input;
+                state->popup.textbox_contents[len + 1] = '\0';
+
+                state->popup.refresh_handler(state);
+                doupdate();
+            }
+        }
+        else if (input == KEY_BACKSPACE) {
+            size_t len = strlen(state->popup.textbox_contents);
+            if (len > 0)
+                state->popup.textbox_contents[len - 1] = '\0';
+
+            state->popup.refresh_handler(state);
+            doupdate();
+        }
+        else if (input == KEY_ENTER) {
+            break;
+        }
+
+        end = false;
+    }
+
+    close_popup(state);
+
+    if (state->dirty.panel_borders) draw_panel_borders(state);
+    if (state->dirty.menubar) draw_menubar(state);
+    if (state->dirty.editor) draw_editor_panel(state);
+    if (state->dirty.tape) draw_tape_panel(state);
+    if (state->dirty.output) draw_output_panel(state);
+
+    doupdate();
+
+    return atoi(state->popup.textbox_contents);
 }
 
 int main(void) {
@@ -88,8 +128,6 @@ int main(void) {
     state.cursor_pos = 0;
     state.current_menubar_option = 0;
 
-    state.debug.jump_head = 0;
-    state.debug.jump_count = 0;
     memset(state.debug.tape, 0, TAPE_LEN);
     state.debug.data_ptr = 0;
 
@@ -228,8 +266,9 @@ int main(void) {
 
                 case KEY_HOME:
                     if (state.mode == Debug) {
-                        clear_debug_jump_history(&state);
-                        regenerate_debug_tape(&state);
+                        // clear_debug_jump_history(&state);
+                        // regenerate_debug_tape(&state);
+                        break;
                     }
                     if (state.in_menubar) {
                         valid = false;
@@ -239,8 +278,9 @@ int main(void) {
                     break;
                 case KEY_END:
                     if (state.mode == Debug) {
-                        clear_debug_jump_history(&state);
-                        regenerate_debug_tape(&state);
+                        // clear_debug_jump_history(&state);
+                        // regenerate_debug_tape(&state);
+                        break;
                     }
                     if (state.in_menubar) {
                         valid = false;
@@ -260,27 +300,16 @@ int main(void) {
                         break;
                     }
 
-                    if (state.cursor_pos > 0) {
-                        state.dirty.editor = true;
-                        state.dirty.tape = true;
-
-                        if (state.mode == Debug && state.debug.jump_count > 0) {
-                            int top = (state.debug.jump_head - 1 + DEBUG_JUMP_HISTORY_SIZE) % DEBUG_JUMP_HISTORY_SIZE;
-
-                            if (state.debug.jump_history[top].dst == state.cursor_pos) {
-                                state.cursor_pos = state.debug.jump_history[top].src;
-                                state.debug.jump_head = top;
-                                --state.debug.jump_count;
-
-                                regenerate_debug_tape(&state);
-                                break;
-                            }
-                        }
-
-                        --state.cursor_pos;
-                        if (state.mode == Debug)
+                    if (state.mode == Debug) {
+                        if (state.debug.step_count > 0) {
+                            --state.debug.step_count;
                             regenerate_debug_tape(&state);
-
+                            state.cursor_pos = state.debug.pc;
+                            state.dirty.editor = true;
+                            state.dirty.tape   = true;
+                        } else {
+                            valid = false;
+                        }
                         break;
                     }
 
@@ -298,44 +327,32 @@ int main(void) {
                         break;
                     }
 
-                    if (state.cursor_pos < state.editor_buffer_len) {
-                        state.dirty.editor = true;
-                        state.dirty.tape = true;
-                        ++state.cursor_pos;
-
-                        if (state.mode == Debug) {
+                    if (state.mode == Debug) {
+                        if (!state.debug.halted) {
+                            ++state.debug.step_count;
                             regenerate_debug_tape(&state);
-
-                            char c = state.editor_buffer[state.cursor_pos];
-                            int dst = -1;
-
-                            if (c == '[' && state.debug.tape[state.debug.data_ptr] == 0)
-                                dst = debug_loop_begin_find_dst(&state);
-                            else if (c == ']' && state.debug.tape[state.debug.data_ptr] != 0)
-                                dst = debug_loop_end_find_dst(&state);
-
-                            if (dst >= 0) {
-                                state.debug.jump_history[state.debug.jump_head].src = state.cursor_pos;
-                                state.debug.jump_history[state.debug.jump_head].dst = dst;
-                                state.debug.jump_head = (state.debug.jump_head + 1) % DEBUG_JUMP_HISTORY_SIZE;
-
-                                if (state.debug.jump_count < DEBUG_JUMP_HISTORY_SIZE)
-                                    ++state.debug.jump_count;
-
-                                state.cursor_pos = dst;
-                                regenerate_debug_tape(&state);
-                            }
+                            state.cursor_pos = state.debug.pc;
+                            state.dirty.editor = true;
+                            state.dirty.tape   = true;
+                        } else {
+                            valid = false;
                         }
+                        break;
+                    }
+
+                    if (state.cursor_pos < state.editor_buffer_len) {
+                        ++state.cursor_pos;
+                        state.dirty.editor = true;
+                        state.dirty.tape   = true;
                         break;
                     }
 
                     valid = false;
                     break;
+
                 case KEY_UP:
-                    if (state.mode == Debug) {
-                        clear_debug_jump_history(&state);
-                        regenerate_debug_tape(&state);
-                    }
+                    if (state.mode == Debug)
+                        break;
                     if (state.in_menubar) {
                         valid = false;
                         break;
@@ -343,10 +360,8 @@ int main(void) {
                     move_cursor_up(&state);
                     break;
                 case KEY_DOWN:
-                    if (state.mode == Debug) {
-                        clear_debug_jump_history(&state);
-                        regenerate_debug_tape(&state);
-                    }
+                    if (state.mode == Debug)
+                        break;
                     if (state.in_menubar) {
                         valid = false;
                         break;
@@ -410,18 +425,26 @@ int main(void) {
                                 if (state.mode == Normal) {
                                     state.mode = Debug;
 
-                                    state.debug.jump_head = 0;
-                                    state.debug.jump_count = 0;
+                                    int row = ask_for_debug_start_pos_popup(&state);
+                                    int target_pos = 0;
+                                    int steps = find_step_count_for_row(&state, row, &target_pos);
+                                    state.debug.step_count = steps < 0 ? 0 : steps;
 
                                     memset(state.debug.tape, 0, sizeof(state.debug.tape));
                                     state.debug.data_ptr = 0;
+
+                                    regenerate_debug_tape(&state);
+
+                                    state.cursor_pos = target_pos;
+                                    state.debug.pc   = target_pos;
                                 }
-                                else state.mode = Normal;
+                                else {
+                                    state.mode = Normal;
+                                    state.cursor_pos = 0;
 
-                                state.cursor_pos = 0;
-
-                                memset(state.output_buffer, 0, OUTPUT_BUFFER_SIZE);
-                                state.output_buffer_len = 0;
+                                    memset(state.output_buffer, 0, OUTPUT_BUFFER_SIZE);
+                                    state.output_buffer_len = 0;
+                                }
 
                                 state.dirty.panel_borders = true;
                                 state.dirty.editor = true;

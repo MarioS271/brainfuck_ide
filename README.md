@@ -5,6 +5,8 @@ A TUI-based IDE for writing, running, and debugging **brainfuck** programs, buil
 
 For a guide on how to use it and how the editor works, see [GUIDE.md](GUIDE.md).
 
+> **IMPORTANT:** This IDE does NOT support mouse inputs. You need to use the keyboard to navigate the menubar. Clicking on the menubar options will NOT work, you need to first press `ESC` and then use the arrow keys and press enter to select one of the options.
+
 ---
 
 ## Features

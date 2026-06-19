@@ -3,6 +3,8 @@
 A TUI-based IDE for writing, running, and debugging **brainfuck** programs, built with PDCurses.
 (i apologize for the insanely bad and messy code)
 
+For a guide on how to use it and how the editor works, see [GUIDE.md](GUIDE.md).
+
 ---
 
 ## Features

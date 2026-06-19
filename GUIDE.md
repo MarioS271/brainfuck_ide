@@ -4,6 +4,7 @@ Hello and welcome to my project: an IDE for the brainf\*ck
 programming language!
 Start off by reading the **Short Summary** and the **Known Issues**. If you're interested in the details, feel free to read the rest. :)
 
+> **IMPORTANT:** This IDE does NOT support mouse inputs. You need to use the keyboard to navigate the menubar. Clicking on the menubar options will NOT work, you need to first press `ESC` and then use the arrow keys and press enter to select one of the options.
 
 **Table of Contents**
 1. [What is it](#what-is-it)
